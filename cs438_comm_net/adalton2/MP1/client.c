@@ -77,26 +77,34 @@ int main(int argc, char *argv[])
 	printf("client: connecting to %s\n", s);
 
 	freeaddrinfo(servinfo); // all done with this structure
+	    if ((numbytes = recv(sockfd, buf, MAXDATASIZE - 1, 0)) == -1) {
+	        perror("recv");
+	        exit(1);
+	    }
 
-        int length = 0;
+	    buf[numbytes] = '\0';
 
-	if ((recv(sockfd, &length, sizeof(int), 0)) == -1) {
-	    perror("recv");
-	    exit(1);
-	}
+	    printf("%s\n",buf);
+        int i;
+        for (i = 0; i < 8; i++)
+        {
+	    /*if ((numbytes = recv(sockfd, buf, MAXDATASIZE - 1, 0)) == -1) {
+	        perror("recv");
+	        exit(1);
+	    }
 
-        printf("client: received %i bytes\n", length);
+	    buf[numbytes] = '\0';
 
-	if ((numbytes = recv(sockfd, buf, length, 0)) == -1) {
-	    perror("recv");
-	    exit(1);
-	}
+	    printf("%s\n",buf);*/
 
-	buf[numbytes] = '\0';
+            int guess;
+            scanf("%i", &guess);
+            printf("%i\n", i);
+            if (send(sockfd, &guess, sizeof(int), 0) == -1) 
+                perror("send");
+        }
 
-	printf("%s",buf);
-
-	close(sockfd);
+        close(sockfd);
 
 	return 0;
 }
