@@ -1,7 +1,7 @@
-TARGETS=client listener server talker
+TARGETS=client server
 
 CC=gcc
-CCOPTS=-Wall -Wextra -pthread
+CCOPTS=-Wall -Wextra
 
 .PHONY: all clean
 
