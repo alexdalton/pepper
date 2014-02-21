@@ -1,0 +1,65 @@
+--
+-- VHDL Architecture ece411.shifter.untitled
+--
+-- Created:
+--          by - adalton2.ews (gelib-057-03.ews.illinois.edu)
+--          at - 18:34:26 02/06/14
+--
+-- using Mentor Graphics HDL Designer(TM) 2012.1 (Build 6)
+--
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+USE ieee.NUMERIC_STD.all;
+
+LIBRARY ece411;
+USE ece411.LC3b_types.all;
+
+ENTITY shifter IS
+   PORT( 
+      RFAout   : IN     LC3b_word;
+      clk      : IN     std_logic;
+      ir4      : IN     std_logic;
+      ir5      : IN     std_logic;
+      imm4     : IN     lc3b_imm4;
+      shiftOut : OUT    lc3b_word
+   );
+
+-- Declarations
+
+END shifter ;
+
+--
+ARCHITECTURE untitled OF shifter IS
+BEGIN
+
+  VHDL_shifter : process (RFAout, ir4, ir5, imm4)
+  variable temp_shiftout : lc3b_word;
+  begin
+    case imm4 is
+      when "0000" =>
+        if (ir4 = '0')
+          shifted <= 
+        else
+          if (ir5 = '0')
+          else
+          end if;
+        end if;
+      when "0001" =>
+      when "0010" =>
+      when "0011" =>
+      when "0100" =>
+      when "0101" =>
+      when "0110" =>
+      when "0111" =>
+      when "1000" =>
+      when "1001" =>
+      when "1010" =>
+      when "1011" =>
+      when "1100" =>
+      when "1101" =>
+      when "1110" =>
+      when "1111" =>
+      when others =>
+  end process VHDL_shifter;
+END ARCHITECTURE untitled;
+
