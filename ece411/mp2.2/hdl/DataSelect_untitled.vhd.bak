@@ -1,0 +1,40 @@
+--
+-- VHDL Architecture ece411.DataSelect.untitled
+--
+-- Created:
+--          by - adalton2.ews (gelib-057-31.ews.illinois.edu)
+--          at - 22:14:14 02/13/14
+--
+-- using Mentor Graphics HDL Designer(TM) 2012.1 (Build 6)
+--
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+USE ieee.NUMERIC_STD.all;
+
+LIBRARY ece411;
+USE ece411.LC3b_types.all;
+
+ENTITY DataSelect IS
+   PORT( 
+      DataOut1    : IN     LC3b_oword;
+      DataOut2    : IN     LC3b_oword;
+      Tag1isEqual : IN     std_logic;
+      Tag2isEqual : IN     std_logic;
+      SelDataOut      : OUT    LC3b_oword;
+      MRESP_H     : OUT    std_logic
+   );
+
+-- Declarations
+
+END DataSelect ;
+
+--
+ARCHITECTURE untitled OF DataSelect IS
+BEGIN
+  SelDataOut <= DataOut1 when Tag1isEqual = '1' else
+                DataOut2 when Tag2isEqual = '1' else
+                x"00000000000000000000000000000000";
+  MRESP_H <= '1' when Tag1isEqual = '1' or Tag2isEqual = '1' else
+             '0';
+END ARCHITECTURE untitled;
+

@@ -1,0 +1,53 @@
+--Modification of the example code for the DataArray for DirtyArray
+
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+USE ieee.NUMERIC_STD.all;
+
+LIBRARY ece411;
+USE ece411.LC3b_types.all;
+
+ENTITY DirtyArray IS
+  PORT(
+    RESET_L : IN std_logic;
+    DirtyWrite : IN std_logic;
+    Index : IN LC3b_c_index;
+    DirtyIn  : IN std_logic;
+    DirtyOut : OUT std_logic
+    );
+-- Declarations
+END DirtyArray ;
+
+--
+ARCHITECTURE untitled OF DirtyArray IS
+  SIGNAL Dirty : std_logic_vector;
+BEGIN
+  --------------------------------------------------------------
+  ReadFromDirtyArray : PROCESS (Dirty, Index)
+  --------------------------------------------------------------
+  VARIABLE DirtyIndex : integer;
+  BEGIN
+    DirtyIndex := to_integer(unsigned(Index));
+    DirtyOut <= Dirty(DirtyIndex) after DELAY_256B;
+  END PROCESS ReadFromDirtyArray;
+  --------------------------------------------------------------
+  WriteToDirtyArray : PROCESS (RESET_L, Index, DirtyWrite, DirtyIn)
+  --------------------------------------------------------------
+  VARIABLE DirtyIndex : integer;
+  BEGIN
+    DirtyIndex := to_integer(unsigned(Index));
+    IF RESET_L = '0' THEN
+      Dirty(0) <= (OTHERS => 'X');
+      Dirty(1) <= (OTHERS => 'X');
+      Dirty(2) <= (OTHERS => 'X');
+      Dirty(3) <= (OTHERS => 'X');
+      Dirty(4) <= (OTHERS => 'X');
+      Dirty(5) <= (OTHERS => 'X');
+      Dirty(6) <= (OTHERS => 'X');
+      Dirty(7) <= (OTHERS => 'X');
+    END IF;
+    IF (DirtyWrite = '1') THEN
+      Dirty(DirtyIndex) <= DirtyIn;
+    END IF;
+  END PROCESS WriteToDirtyArray;
+END ARCHITECTURE untitled;

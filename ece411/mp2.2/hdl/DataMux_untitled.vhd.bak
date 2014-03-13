@@ -1,0 +1,42 @@
+--
+-- VHDL Architecture ece411.DataMux.untitled
+--
+-- Created:
+--          by - adalton2.ews (gelib-057-31.ews.illinois.edu)
+--          at - 22:22:02 02/13/14
+--
+-- using Mentor Graphics HDL Designer(TM) 2012.1 (Build 6)
+--
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+USE ieee.NUMERIC_STD.all;
+
+LIBRARY ece411;
+USE ece411.LC3b_types.all;
+
+ENTITY DataMux IS
+   PORT( 
+      OFFSET     : IN     LC3B_C_OFFSET;
+      SelDataOut : IN     LC3b_oword;
+      DATAIN     : OUT    LC3b_word
+   );
+
+-- Declarations
+
+END DataMux ;
+
+--
+ARCHITECTURE untitled OF DataMux IS
+BEGIN
+  DATAIN <= SelDataOut(15 downto 0) when offset = "0000" or offset = "0001" else
+            SelDataOut(31 downto 16) when offset = "0000" or offset = "0001" else
+            SelDataOut(47 downto 32) when offset = "0000" or offset = "0001" else
+            SelDataOut(63 downto 48) when offset = "0000" or offset = "0001" else
+            SelDataOut(79 downto 64) when offset = "0000" or offset = "0001" else
+            SelDataOut(95 downto 80) when offset = "0000" or offset = "0001" else
+            SelDataOut(111 downto 96) when offset = "0000" or offset = "0001" else
+            SelDataOut(127 downto 112) when offset = "0000" or offset = "0001" else
+            x"0000";
+
+END ARCHITECTURE untitled;
+
