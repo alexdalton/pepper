@@ -1,0 +1,10 @@
+**NOTE**
+The client can send any 4 characters to the server.
+The server side converts each character to a integer between 0-5.
+It does this by subtracting '0' from the character and the mod 6.
+
+Simply run the makefile to compile both server and client.
+
+usage:
+./server PORT
+./client ADDRESS PORT

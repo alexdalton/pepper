@@ -302,7 +302,7 @@ int send_to_client(int sockfd, void * buffer, int length)
 int receive_from_client(int sockfd, void * buffer, int bufsize)
 {
     int numbytes;
-    if ((numbytes = read(sockfd, buffer, bufsize)) < 0)
+    if ((numbytes = recv(sockfd, buffer, bufsize, 0)) < 0)
     {
         perror("recv");
         exit(0);

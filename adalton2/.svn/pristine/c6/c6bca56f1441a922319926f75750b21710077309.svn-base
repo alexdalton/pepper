@@ -34,7 +34,7 @@ void *get_in_addr(struct sockaddr *sa)
 	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-int main(int argc, char *argv[])
+int main(void)
 {
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
 	struct addrinfo hints, *servinfo, *p;
@@ -49,25 +49,6 @@ int main(int argc, char *argv[])
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE; // use my IP
-
-        if (argc != 2) {
-            fprintf(stderr, "usage: server filename\n");
-            exit(1);
-        }
-        
-        FILE *fp = fopen(argv[1], "r");
-
-        char buf[100];
-
-        char c = fgetc(fp);
-        int fsize = 0;
-
-        while (c != EOF)
-        {
-            buf[fsize] = c;
-            c = fgetc(fp);
-            fsize++;
-        }
 
 	if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
@@ -134,8 +115,8 @@ int main(int argc, char *argv[])
 
 		if (!fork()) { // this is the child process
 			close(sockfd); // child doesn't need the listener
-                        send(new_fd, &fsize, 4, 0);
-                        send(new_fd, buf, fsize, 0); 
+			if (send(new_fd, "Hello, world!", 13, 0) == -1)
+				perror("send");
 			close(new_fd);
 			exit(0);
 		}
