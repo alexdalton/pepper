@@ -1,4 +1,4 @@
-TARGETS=manager node
+TARGETS=manager distvec linkstate
 
 CC=g++
 CCOPTS=-Wall -Wextra
