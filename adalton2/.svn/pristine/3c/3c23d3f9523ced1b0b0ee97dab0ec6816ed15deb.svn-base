@@ -1,8 +1,0 @@
-I worked alone on this project, so every line of code is my own.
-
-Everything functions as explained in the MP2 documentation.
-Testing was done primarily on a single machine with 127.0.0.1
-as the IP for every node and the manager so the program may not
-behave perfectly across different IPs. 
-
-The programs usage is as specified in the documentation.
