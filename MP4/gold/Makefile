@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS= -Wall -Werror -Wextra
+CFLAGS= -g -Wall -Werror -Wextra
 
 mp4: main.o printBinary.o
 	$(CC) $(CFLAGS) main.o printBinary.o -o mp4

@@ -6,13 +6,22 @@ void convert(int value, int key);
 int main(void)
 {
     int value, key;
-    printf("Enter an integer: ");
-    scanf("%d", &value);
+    char inCheck;
 
+    // Get integer and check for valid
+    printf("Enter an integer: ");
+    if (scanf("%d%c", &value, &inCheck) != 2 || inCheck != '\n')
+    {
+        printf("Invalid input\n");
+        return -1;
+    }
+
+    // Get conversion key
     printf("0: Binary\n1: Octal\n2: Decimal\n3: Hex\n");
     printf("Enter conversion: ");
     scanf("%d", &key);
 
+    // Convert base and print
     convert(value, key);
     return 0;
 }
@@ -28,7 +37,7 @@ void convert(int value, int key)
     switch (key)
     {
         case 0:
-            printBinary(value);
+            printBinary(value, sizeof(int));
             break;
         case 1:
             printf("%o\n", value);

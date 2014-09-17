@@ -1,23 +1,21 @@
 #include <stdio.h>
 
 /* 
- * Prints a 32 bit integer in binary
+ * Prints an integer in binary
  * @param value The integer to print in binary
+ * @param size Size of an integer in bytes
  * @return none
  */
-void printBinary(int value)
+void printBinary(int value, int size)
 {
-    unsigned char *b = (unsigned char*) &value;
-    unsigned char byte;
-    int i, j;
-    for(i = 3; i >= 0; i--)
+    int i;
+    for(i = 0; i < (size * 8); i++)
     {
-        for(j = 0; j < 8; j++)
-        {
-            byte = b[i] & (1 << j);
-            byte = byte >> j;
-            printf("%u", byte);
-        }
+        if (value & 0x80000000)
+            printf("1");
+        else
+            printf("0");
+        value <<= 1;
     }
     printf("\n");
 }

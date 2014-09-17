@@ -1,19 +1,28 @@
 #include <stdio.h>
 #include "printBinary.h"
 
-/********* FUNCTION DECLARATIONS *************/
+// FUNCTION DECLARATIONS
 void convert(int value, int key);
 
 int main(void)
 {
     int value, key;
-    printf("Enter an integer: ");
-    scanf("%d", &value);
+    char inCheck;
 
+    // Get integer and check for valid
+    printf("Enter an integer: ");
+    if (scanf("%d%c", &value, &inCheck) != 2 || inCheck != '\n')
+    {
+        printf("Invalid input\n");
+        return -1;
+    }
+
+    // Get conversion key
     printf("0: Binary\n1: Octal\n2: Decimal\n3: Hex\n");
     printf("Enter conversion: ");
     scanf("%d", &key);
 
+    // Convert base and print
     convert(value, key);
     return 0;
 }
@@ -26,6 +35,6 @@ int main(void)
  */
 void convert(int value, int key)
 {
-    // INSERT YOUR CODE HERE
+    // YOUR CODE GOES HERE.
 }
 
