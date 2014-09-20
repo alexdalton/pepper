@@ -1,0 +1,43 @@
+#
+# The name of the package's author.
+#
+AUTHOR="Steven S. Lumetta"
+
+#
+# The name of the author's ``company.''  The name is used for Windows
+# installation (the program is installed by default under this directory),
+# and the display name is used for things like the Start menu.
+#
+COMPANY_NAME="UIUC_ECE198KL"
+COMPANY_DISPLAY_NAME="UIUC ECE198KL"
+
+#
+# A text description of the program used for Windows installers.
+#
+DESCRIPTION="UIUC ECE198KL Spring 2013 Program 5 Demo Version: WALY/SDL-based Codebreaker"
+
+# The package name should be an inverted domain name: that is, words 
+# separated by dots with no spaces, starting from general and becoming
+# more specific.  Some systems use the package name as a unique 
+# identifier (along with version numbers) for your package, so choose 
+# wisely.
+#
+# NOTES: you may ONLY use lower case letters (enforced on webOS);
+#        also, webOS REQUIRES three-valued version names, as x.y.z
+#
+PACKAGE="com.lumetta.program5demo"
+VERSION_NUMBER="1"
+VERSION_NAME="1.0.0"
+
+#
+# The name used for your code, library, program, etc.  Normally just the
+# last part of the package name.
+#
+CODE_NAME="prog5demo"
+
+#
+# The display name is a human-friendly version that can contain spaces.
+# (The display name cannot contain '@', however.)
+#
+APP_DISPLAY_NAME="ECE198KL Program 5 Demo: Codebreaker"
+

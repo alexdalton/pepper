@@ -1,0 +1,135 @@
+#!/bin/sh
+
+TFILES=target-files/android
+
+# Make sure that we're in the topmost directory.
+if [ ! -d target-files ] ; then
+    echo "Do not execute this file directly."
+    exit
+fi
+
+if [ "$1" = "clean" ] ; then
+    echo "Cleaning up Android target."
+    # Also removes directories created by ndk-build and Eclipse.
+    dirs="res src jni/libpng libs obj bin gen"
+    for d in $dirs ; do
+	if [ -d $d ] ; then
+	    mv -f $d TRASH
+	fi
+    done
+    # Also removes files created by Eclipse.
+    files="AndroidManifest.xml build.xml jni/Android.mk jni/Application.mk .project .classpath project.properties"
+    for f in $files ; do
+        if [ -r $f ] ; then
+	    mv -f $f TRASH
+	fi
+    done
+    # More than one Android.mk -- avoid destroying them.
+    mkdir -p TRASH/android/WALY
+    files="android_native_app_glue.h Android.mk"
+    for f in $files ; do
+        if [ -r jni/WALY/$f ] ; then
+	    mv -f jni/WALY/$f TRASH/android/WALY
+	fi
+    done
+    exit
+fi
+
+# Look for the ImageMagick convert tool.
+convert=`which convert 2> /dev/null`
+if [ ! "$?" = "0" ]; then
+    convert=""
+fi
+
+#--------------------------------------------------------------------------
+# Set up the resources directory ("res").
+
+echo "Creating the resources directory."
+
+mkdir -p res/drawable-hdpi res/drawable-ldpi res/drawable-mdpi \
+	res/drawable-xhdpi res/layout res/values
+
+# arguments are (pixel size, drawable dir suffix)
+function createIcon () {
+    if [ -r icons/icon$1.png ] ; then
+	cp -p icons/icon$1.png res/drawable-$2/icon.png
+    else
+	if [ ! "$convert" = "" ] ; then
+	    echo "Creating ${1}x${1}-pixel icon."
+	    $convert -geometry ${1}x${1} icons/icon48.png \
+		    res/drawable-$2/icon.png
+	else
+	    echo "Missing ${1}x${1}-pixel icon (icons/icon$1.png)."
+	    exit
+	fi
+    fi
+}
+
+# Make the four icons.
+cp -p icons/icon48.png res/drawable-mdpi/icon.png
+createIcon 36 ldpi
+createIcon 72 hdpi
+createIcon 96 xhdpi
+
+# Make the strings.xml resource file.
+sed -e "s@__APP_DISPLAY_NAME__@$APP_DISPLAY_NAME@g" \
+	$TFILES/strings.xml.def > res/values/strings.xml
+
+#--------------------------------------------------------------------------
+# Set up the Java glue code directory ("src").
+
+echo "Creating the Java glue code directory."
+
+srcname=`echo $PACKAGE | sed 's@\\.@/@g'`
+mkdir -p src/$srcname
+sed -e "s@__PACKAGE__@$PACKAGE@g" -e "s@__CODE_NAME__@$CODE_NAME@g"  \
+	$TFILES/JavaGlueCode.java.def > src/$srcname/$CODE_NAME.java
+
+#--------------------------------------------------------------------------
+# Create the Android manifest.
+
+echo "Creating the Android manifest."
+
+sed -e "s@__PACKAGE__@$PACKAGE@g"                   \
+	-e "s@__VERSION_NUMBER__@$VERSION_NUMBER@g" \
+	-e "s@__VERSION_NAME__@$VERSION_NAME@g"     \
+	-e "s@__CODE_NAME__@$CODE_NAME@g"           \
+	$TFILES/AndroidManifest.xml.def > AndroidManifest.xml
+
+#--------------------------------------------------------------------------
+# Create the Ant build file.
+
+echo "Creating the Ant build file."
+
+sed -e "s@__CODE_NAME__@$CODE_NAME@g"     \
+	$TFILES/build.xml.def > build.xml
+
+#--------------------------------------------------------------------------
+# Copy the libPNG sources into to the source tree.
+
+echo "Copying libPNG into the source tree."
+
+cp -pr $TFILES/libpng jni
+
+#--------------------------------------------------------------------------
+# Prepare the WALY library source directory for Android.
+
+echo "Preparing the WALY library source directory for Android."
+
+cp -p $TFILES/android_native_app_glue.h jni/WALY
+cp -p $TFILES/WALY.Android.mk jni/WALY/Android.mk
+
+#--------------------------------------------------------------------------
+# Prepare the main source directory for Android.
+
+echo "Preparing the main source directory for Android."
+
+cp -p $TFILES/Application.mk jni
+sed -e "s@__CODE_NAME__@$CODE_NAME@g" \
+	$TFILES/Android.mk.def > jni/Android.mk
+
+#--------------------------------------------------------------------------
+# Announce completion.
+
+echo "Ready for Android build."
+

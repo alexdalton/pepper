@@ -1,0 +1,167 @@
+#!/bin/sh
+
+TFILES=target-files/cygwin
+
+# Make sure that we're in the topmost directory.
+if [ ! -d target-files ] ; then
+    echo "Do not execute this file directly."
+    exit
+fi
+
+if [ "$1" = "clean" ] ; then
+    echo "Cleaning up Cygwin/Linux target."
+    if [ -d storage ] ; then
+        if [ -z $( find storage -maxdepth 0 -empty ) ] ; then
+	    echo "*** Deliberately NOT deleting the local storage directory (storage). ***"
+	else
+	    # it's empty, but ... user may not realize that fact
+	    mv -f storage TRASH
+	fi
+    fi
+    dirs="debug install_materials"
+    for d in $dirs ; do
+	if [ -d $d ] ; then
+	    mv -f $d TRASH
+	fi
+    done
+    # More than one Makefile -- avoid destroying them.
+    mkdir -p TRASH/cygwin/jni/WALY
+    if [ -r Makefile ] ; then
+        mv -f Makefile TRASH/cygwin/
+    fi
+    if [ -r jni/Makefile ] ; then
+        mv -f jni/Makefile TRASH/cygwin/jni
+    fi
+    if [ -r jni/WALY/Makefile ] ; then
+        mv -f jni/WALY/Makefile TRASH/cygwin/jni/WALY
+    fi
+    # Just discard object files, executable, library, and installer.
+    rm -f jni/*.o ${CODE_NAME} ${CODE_NAME}.exe ${CODE_NAME}.exe.stackdump jni/WALY/*.o jni/WALY/libWALY.a "${APP_DISPLAY_NAME} ${VERSION_NAME} Installer.exe"
+    exit
+fi
+
+# Look for the ImageMagick convert tool.
+convert=`which convert 2> /dev/null`
+if [ ! "$?" = "0" ]; then
+    convert=""
+fi
+
+#--------------------------------------------------------------------------
+# Check for the icon.
+
+if [ ! -r icons/icon32.png ] ; then
+    if [ ! "$convert" = "" ] ; then
+	echo "Creating 32x32-pixel icon."
+	$convert -geometry 32x32 icons/icon48.png icons/icon32.png
+    else
+	echo "WARNING: Missing 32x32-pixel icon (icons/icon32.png)."
+	# code will execute--just uses some default icon
+    fi
+fi
+
+#--------------------------------------------------------------------------
+# Create the storage directory.
+
+echo "Creating the storage directory."
+
+mkdir -p storage
+
+#--------------------------------------------------------------------------
+# Create the debug directory.
+
+echo "Creating the debug directory."
+
+mkdir -p debug
+
+#--------------------------------------------------------------------------
+# Create the install_materials directory (Cygwin only).
+
+if [ "cygwin" = $1 ]; then
+    echo "Creating the install_materials directory."
+
+    mkdir -p install_materials
+
+    sed -e "s@__AUTHOR__@$AUTHOR@g"                          \
+	    -e "s@__APP_DISPLAY_NAME__@$APP_DISPLAY_NAME@g"  \
+	    $TFILES/license.txt.def > install_materials/license.txt
+    unix2dos install_materials/license.txt
+
+    sed -e "s@__AUTHOR__@$AUTHOR@g"                                     \
+	    -e "s@__COMPANY_NAME__@$COMPANY_NAME@g"                     \
+	    -e "s@__COMPANY_DISPLAY_NAME__@$COMPANY_DISPLAY_NAME@g"     \
+	    -e "s@__DESCRIPTION__@$DESCRIPTION@g"                       \
+	    -e "s@__VERSION_NAME__@$VERSION_NAME@g"                     \
+	    -e "s@__CODE_NAME__@$CODE_NAME@g"                           \
+	    -e "s@__APP_DISPLAY_NAME__@$APP_DISPLAY_NAME@g"             \
+	    $TFILES/installer.nsi.def > install_materials/installer.nsi
+
+    cp -p install_materials/license.txt install_materials/show-license.txt
+
+    if [ -r icons/icon48.ico ]; then
+        cp -p icons/icon48.ico install_materials/icon.ico
+    else
+	if [ ! "$convert" = "" ] ; then
+	    echo "Creating 48x48-pixel icon (.ico)."
+	    $convert icons/icon48.png install_materials/icon.ico
+	else
+	    echo "WARNING: Missing 48x48-pixel icon (icons/icon48.ico)."
+	fi
+    fi
+
+    if [ -r icons/installer.ico ]; then
+        cp -p icons/installer.ico install_materials/installer.ico
+    else
+	if [ -r install_materials/icon.ico ]; then
+	    echo "Creating 48x48-pixel installer icon (.ico)."
+	    cp -p install_materials/icon.ico install_materials/installer.ico
+	fi
+    fi
+
+    if [ -r icons/logo.bmp ]; then
+        cp -p icons/logo.bmp install_materials/logo.bmp
+    else
+	if [ ! "$convert" = "" ] ; then
+	    echo "Creating 400x72-pixel bitmap logo."
+	    if [ -r icons/icon72.png ]; then
+		$convert -extent 400x72 icons/icon72.png \
+			install_materials/logo.bmp
+	    else
+		$convert -scale 72x72 -extent 400x72 icons/icon48.png \
+			install_materials/logo.bmp
+	    fi
+	else
+	    echo "WARNING: Missing 400x72-pixel logo (icons/logo.bmp)."
+	fi
+    fi
+
+fi
+
+#--------------------------------------------------------------------------
+# Prepare the WALY library source directory for Cygwin/Linux.
+
+echo "Preparing the WALY library source directory for Cygwin/Linux."
+
+sed -e "s@__CODE_NAME__@$CODE_NAME@g"                    \
+	-e "s@__APP_DISPLAY_NAME__@$APP_DISPLAY_NAME@g"  \
+	$TFILES/jni-WALY-Makefile.def > jni/WALY/Makefile
+
+#--------------------------------------------------------------------------
+# Prepare the main source directory for Cygwin/Linux.
+
+echo "Preparing the main source directory for Cygwin/Linux."
+
+sed -e "s@__CODE_NAME__@$CODE_NAME@g" \
+	$TFILES/jni-Makefile.def > jni/Makefile
+
+#--------------------------------------------------------------------------
+# Prepare the top-level directory for Cygwin/Linux.
+
+echo "Preparing the top-level directory for Cygwin/Linux."
+
+cp -p $TFILES/Makefile .
+
+#--------------------------------------------------------------------------
+# Announce completion.
+
+echo "Ready for Cygwin/Linux build."
+

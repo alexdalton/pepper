@@ -1,0 +1,104 @@
+<project name="__CODE_NAME__" default="debug" basedir=".">
+
+    <!--                                                            -->
+    <!-- WARNING: THIS FILE HAS BEEN GENERATED AUTOMATICALLY BY     -->
+    <!-- WALY TARGET SETUP.  IF YOU WANT TO EDIT, EDIT THE ORIGINAL -->
+    <!-- IN target-files/android/build.xml.def                      -->
+    <!--                                                            -->
+
+    <!-- Make environment variables accessible using a prefix ('env.'). -->
+    <property environment="env" />
+
+    <!-- Get the NDK and SDK directories. -->
+    <condition property="ndk.dir" value="${env.ANDROID_NDK}">
+	<isset property="env.ANDROID_NDK" />
+    </condition>
+    <condition property="sdk.dir" value="${env.ANDROID_HOME}">
+	<isset property="env.ANDROID_HOME" />
+    </condition>
+    <condition property="sdk.dir" value="${env.ANDROID_SDK}">
+	<isset property="env.ANDROID_SDK" />
+    </condition>
+
+    <!-- Check that both were found.  If not, stop and complain. --> 
+    <fail message="Set your ANDROID_NDK environment variable."
+	  unless="ndk.dir" />
+    <fail message="Set your ANDROID_SDK or ANDROID_HOME environment variable."
+	  unless="sdk.dir" />
+
+    <!--                                                           -
+       - Try to find the shell to execute ndk-build.  With Cygwin, -
+       - there's a wrapper for native Windows execution, but it    -
+       - has a different name, so instead we launch both Linux-    -
+       - and Cygwin-based Android builds with /bin/sh.             -
+       -                                                           -->
+    <condition property="shell" value="/bin/sh" else="C:\cygwin\bin\sh">
+	<resourceexists>
+	    <file file="/bin/sh" />
+	</resourceexists>
+    </condition>
+
+    <!--                                                            -
+       - WARNING: WALY packaging is designed to work with           -
+       - so you should use Java reflection to fall back onto        -
+       - android-14.                                                -
+       -                                                            -->
+    <property name="target" value="android-14" />
+
+    <target name="testdbg">
+	<condition property="target.is.release">
+	    <equals arg1="${ant.project.invoked-targets}" arg2="release" />
+	</condition>
+	<condition property="target.is.debug">
+	    <equals arg1="${ant.project.invoked-targets}" arg2="debug" />
+	</condition>
+    </target>
+
+    <target name="pbrel" if="target.is.release">
+	<exec executable="${shell}" failonerror="true">
+	    <arg value="${ndk.dir}/ndk-build" />
+	</exec>
+    </target>
+
+    <target name="pbdbg" if="target.is.debug">
+	<exec executable="${shell}" failonerror="true">
+	    <arg value="${ndk.dir}/ndk-build" />
+	    <arg value="NDK_DEBUG=1" />
+	</exec>
+    </target>
+
+    <target name="-pre-clean">
+	<exec executable="${shell}" failonerror="true">
+	    <arg value="${ndk.dir}/ndk-build" />
+	    <arg value="clean" />
+	</exec>
+    </target>
+
+    <target name="postdbg" if="target.is.debug">
+	<!--                                                         -
+	   - Fancy that!  ADB does not actually return an error code -
+	   - when it fails (due to inconsistent certificates, at     -
+	   - least), so one can't actually stop the build.           -
+	   - Who would have guessed?                                 -
+	   -                                                         -->
+        <exec executable="${sdk.dir}/platform-tools/adb" failonerror="true">
+	    <arg value="install" />
+	    <arg value="-r" />
+	    <arg value="bin/__CODE_NAME__-debug.apk" />
+	</exec>
+    </target>
+
+    <target name="postrel" if="target.is.release">
+        <echo message="You will need to sign (jarsigner), align (zipalign)," />
+	<echo message="and install (adb install) the release version of the" />
+	<echo message="APK yourself." />
+    </target>
+
+    <target name="-pre-build" depends="testdbg,pbrel,pbdbg" />
+
+    <target name="-post-build" depends="postdbg,postrel" />
+
+    <!-- version-tag: custom -->
+    <import file="${sdk.dir}/tools/ant/build.xml" />
+
+</project>

@@ -1,0 +1,131 @@
+package __PACKAGE__;
+
+//
+// WARNING: THIS FILE HAS BEEN GENERATED AUTOMATICALLY BY
+// WALY TARGET SETUP.  IF YOU WANT TO EDIT, EDIT THE ORIGINAL
+// IN target-files/android/JavaGlueCode.java.def
+//
+
+import android.annotation.SuppressLint;
+import android.app.NativeActivity;
+import android.content.Context;
+import android.graphics.Rect;
+import android.view.inputmethod.InputMethodManager;
+import android.view.Display;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import java.lang.reflect.Method;
+
+public class __CODE_NAME__ extends NativeActivity {
+	static {
+		System.loadLibrary("stlport_shared");
+		System.loadLibrary("__CODE_NAME__");
+	}
+	
+	void 
+	showKeyboard ()
+	{
+		InputMethodManager m = (InputMethodManager)getSystemService (Context.INPUT_METHOD_SERVICE);
+		m.toggleSoftInput (InputMethodManager.SHOW_IMPLICIT, 0);
+	}
+	
+	void
+	hideKeyboard ()
+	{
+		InputMethodManager m = (InputMethodManager)getSystemService (Context.INPUT_METHOD_SERVICE);
+		m.toggleSoftInput (0, 0);
+	}
+	
+	String
+	getAppName ()
+	{
+		return getPackageName ();
+	}
+	
+	String
+	getAppDir ()
+	{
+		return getDir ("", MODE_PRIVATE).getAbsolutePath();
+	}
+	
+	void
+	minimize ()
+	{
+		moveTaskToBack (true);
+	}
+
+	// physical screen width not available in Android NDK
+	@SuppressLint("NewApi")
+	int
+	getWidth ()
+	{
+		//
+		// getRealMetrics is not available until Android-17 (4.2), 
+		// but we want to run on Android-14 (4.0), so we use Java
+		// reflection to look for the method, and fall back on
+		// getMetrics if the method does not exist.
+		//
+		DisplayMetrics metrics = new DisplayMetrics ();
+		Display defDisplay = getWindowManager ().getDefaultDisplay ();
+		@SuppressWarnings("rawtypes")
+		Class[] pTypes = new Class[1];
+		pTypes[0] = metrics.getClass ();
+		try {
+			Method m = defDisplay.getClass ().getMethod ("getRealMetrics", pTypes);
+			m.invoke (defDisplay, metrics);
+		} catch (Exception e) {
+			// Log.i ("WALY", "getRealMetrics not usable.");
+			defDisplay.getMetrics (metrics);
+		}
+		// Log.i ("WALY", "getWidth" + Integer.toString (metrics.widthPixels) + "x" + Integer.toString (metrics.heightPixels));
+		return metrics.widthPixels;
+	}
+	
+	// physical screen height not available in Android NDK
+	@SuppressLint("NewApi")
+	int
+	getHeight ()
+	{
+		//
+		// getRealMetrics is not available until Android-17 (4.2), 
+		// but we want to run on Android-14 (4.0), so we use Java
+		// reflection to look for the method, and fall back on
+		// getMetrics if the method does not exist.
+		//
+		DisplayMetrics metrics = new DisplayMetrics ();
+		Display defDisplay = getWindowManager ().getDefaultDisplay ();
+		@SuppressWarnings("rawtypes")
+		Class[] pTypes = new Class[1];
+		pTypes[0] = metrics.getClass ();
+		try {
+			Method m = defDisplay.getClass ().getMethod ("getRealMetrics", pTypes);
+			m.invoke (defDisplay, metrics);
+		} catch (Exception e) {
+			// Log.i ("WALY", "getRealMetrics not usable.");
+			defDisplay.getMetrics (metrics);
+		}
+		// Log.i ("WALY", "getHeight" + Integer.toString (metrics.widthPixels) + "x" + Integer.toString (metrics.heightPixels));
+		return metrics.heightPixels;
+	}
+	
+	// status bar height not available in Android NDK
+	int
+	getTopVisible ()
+	{
+		Rect r = new Rect ();
+		getWindow ().getDecorView ().getWindowVisibleDisplayFrame (r);
+		// Log.i ("WALY", "getTopVisible" + Integer.toString (r.top));
+		return r.top;
+	}
+
+	// timing of this information is poor within Android NDK
+	int
+	getBottomVisible ()
+	{
+		Rect r = new Rect ();
+		getWindow ().getDecorView ().getWindowVisibleDisplayFrame (r);
+		// Log.i ("WALY", "getBottomVisible" + Integer.toString (r.bottom));
+		return r.bottom;
+	}
+}
+

@@ -1,0 +1,106 @@
+#!/bin/sh
+
+TFILES=target-files/webos
+
+# Make sure that we're in the topmost directory.
+if [ ! -d target-files ] ; then
+    echo "Do not execute this file directly."
+    exit
+fi
+
+if [ "$1" = "clean" ] ; then
+    echo "Cleaning up WebOS target."
+    dirs="build pkg"
+    for d in $dirs ; do
+	if [ -d $d ] ; then
+	    mv -f $d TRASH
+	fi
+    done
+    # More than one Makefile -- avoid destroying them.
+    mkdir -p TRASH/webos/jni/WALY
+    if [ -r Makefile ] ; then
+        mv -f Makefile TRASH/webos/
+    fi
+    if [ -r jni/Makefile ] ; then
+        mv -f jni/Makefile TRASH/webos/jni
+    fi
+    if [ -r jni/WALY/Makefile ] ; then
+        mv -f jni/WALY/Makefile TRASH/webos/jni/WALY
+    fi
+    # Just discard object files and library.
+    rm -f jni/*.o jni/WALY/*.o jni/WALY/libWALY.a
+    exit
+fi
+
+#--------------------------------------------------------------------------
+# Set up the build directory ("build").
+
+echo "Creating the build directory."
+
+mkdir -p build/app/assistants build/app/views build/stylesheets
+
+cp -p $TFILES/stage-assistant.js build/app/assistants
+cp -p $TFILES/WALYapp.css build/stylesheets
+cp -p $TFILES/framework_config.json build
+cp -p $TFILES/sources.json build
+
+sed -e "s@__PACKAGE__@$PACKAGE@g"                       \
+	-e "s@__VERSION_NAME__@$VERSION_NAME@g"         \
+	-e "s@__AUTHOR__@$AUTHOR@g"                     \
+	-e "s@__CODE_NAME__@$CODE_NAME@g"               \
+	-e "s@__APP_DISPLAY_NAME__@$APP_DISPLAY_NAME@g" \
+	$TFILES/appinfo.json.def > build/appinfo.json
+
+sed -e "s@__CODE_NAME__@$CODE_NAME@g" \
+	$TFILES/index.html.def > build/index.html
+
+sed -e "s@__CODE_NAME__@$CODE_NAME@g" \
+	$TFILES/package.properties.def > build/package.properties
+
+#--------------------------------------------------------------------------
+# Set up the package directory ("pkg").
+
+echo "Creating the packge directory (pkg)."
+
+mkdir -p pkg
+
+#--------------------------------------------------------------------------
+# Prepare the WALY library source directory for WebOS.
+
+echo "Preparing the WALY library source directory for WebOS."
+
+if [ "webos32" = $1 ] ; then
+    cp -p $TFILES/jni-WALY-Makefile32 jni/WALY/Makefile
+else
+    cp -p $TFILES/jni-WALY-Makefile jni/WALY/Makefile
+fi
+
+#--------------------------------------------------------------------------
+# Prepare the main source directory for WebOS.
+
+echo "Preparing the main source directory for WebOS."
+
+if [ "webos32" = $1 ] ; then
+    sed -e "s@__PACKAGE__@$PACKAGE@g"                       \
+	    -e "s@__VERSION_NAME__@$VERSION_NAME@g"         \
+	    -e "s@__CODE_NAME__@$CODE_NAME@g"               \
+	    $TFILES/jni-Makefile32.def > jni/Makefile
+else
+    sed -e "s@__PACKAGE__@$PACKAGE@g"                       \
+	    -e "s@__VERSION_NAME__@$VERSION_NAME@g"         \
+	    -e "s@__CODE_NAME__@$CODE_NAME@g"               \
+	    $TFILES/jni-Makefile.def > jni/Makefile
+fi
+
+#--------------------------------------------------------------------------
+# Prepare the top-level directory for WebOS.
+
+echo "Preparing the top-level directory for WebOS."
+
+cp -p $TFILES/Makefile .
+
+#--------------------------------------------------------------------------
+# Announce completion.
+
+echo "Ready for WebOS build."
+

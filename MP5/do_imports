@@ -1,0 +1,15 @@
+#/bin/sh
+
+if [ ! -r students.txt ] ; then
+    echo "Need a list of netids in students.txt"
+    exit
+else
+    echo "Found list of students."
+fi
+
+cd distribution
+
+for netid in `cat ../students.txt` ; do
+    echo "Importing for $netid"
+    svn import -m "Import Program 5 distribution." https://subversion.ews.illinois.edu/svn/sp13-ece198kl/${netid}/prog5
+done

@@ -1,0 +1,78 @@
+#!/bin/sh
+
+#
+# Will not work with 'dash'.  Use bash if /bin/sh points to dash.
+#
+
+# dir defaults to target
+dir=$1
+case $1 in
+	android)
+	    echo "Target is Android build (under Cygwin or Linux)."
+	    ;;
+	cygwin)
+	    echo "Target is Cygwin build."
+	    ;;
+	linux)
+	    echo "Target is Linux build."
+	    dir=cygwin
+	    ;;
+	webos)
+	    echo "Target is WebOS build under Cygwin on 64-bit Windows."
+	    echo "(Use webos32 if you use a 32-bit version of Windows.)"
+	    ;;
+	webos32)
+	    echo "Target is WebOS build under Cygwin on 32-bit Windows."
+	    echo "(Use webos if you use a 64-bit version of Windows.)"
+	    dir=webos
+	    ;;
+	clean)
+	    echo "Cleaning up files from all targets."
+	    # We need some of the variables for cleaning.
+	    ;;
+	*)
+	    echo "syntax: set-target <target>"
+	    echo "targets include: android, cygwin, linux, webos, webos32"
+	    echo "or 'set-target clean' to clean up"
+	    exit
+esac
+
+
+#
+# Bring the targets together just to check.
+#
+
+# Read the user-defined value file.
+source ./VALUES.def
+
+if [ ! "$?" = "0" ] ; then
+    echo "Error in VALUES.def file.  Stopping."
+    exit
+fi
+vars="AUTHOR COMPANY_NAME COMPANY_DISPLAY_NAME DESCRIPTION PACKAGE VERSION_NUMBER VERSION_NAME CODE_NAME APP_DISPLAY_NAME"
+for v in $vars ; do
+    # Here's a useful sh substitution that I couldn't find last time I wrote
+    # in this language... (note that the braces are necessary here; the
+    # meaning without them is different.)
+    if [ -z "${!v}" ] ; then
+	echo "Variable $v not set in VALUES.def file.  Stopping."
+	exit
+    fi
+    # Here's what it lets you avoid...
+    # eval "if [ -z \"\$$v\" ] ; then echo \"Variable $v not set in VALUES.def file.  Stopping.\" ; exit ; fi"
+    export $v
+done
+
+if [ "$1" = "clean" ] ; then
+    mkdir -p TRASH
+    # webos and webos32 are under webos
+    for tgt in android cygwin webos ; do 
+	./target-files/$tgt/set-target-$tgt clean
+    done
+    echo "Files to be discarded are in the TRASH directory."
+    exit
+fi
+
+# Everything seems to be in order... make the target.
+./target-files/${dir}/set-target-$dir $1
+

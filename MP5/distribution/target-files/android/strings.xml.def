@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+    <!--                                                            -->
+    <!-- WARNING: THIS FILE HAS BEEN GENERATED AUTOMATICALLY BY     -->
+    <!-- WALY TARGET SETUP.  IF YOU WANT TO EDIT, EDIT THE ORIGINAL -->
+    <!-- IN target-files/android/strings.xml.def                    -->
+    <!--                                                            -->
+
+<resources>
+    <string name="app_name">__APP_DISPLAY_NAME__</string>
+
+</resources>

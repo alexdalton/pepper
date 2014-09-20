@@ -1,0 +1,74 @@
+.ALL := install
+
+#
+# WARNING: THIS FILE HAS BEEN GENERATED AUTOMATICALLY BY
+# WALY TARGET SETUP.  IF YOU WANT TO EDIT, EDIT THE ORIGINAL
+# IN target-files/webos/jni-Makefile32.def
+#
+# *** This package's source files are listed in Make.inc ***
+#
+
+CFLAGS = -g -Wall -DWALY_TARGET_WEBOS
+#CFLAGS = -Wall
+
+# use these settings to target the device (phone)
+# for Win32
+PDKDIR = C:/Program\ Files/HP\ webOS/PDK
+# for Win64
+#PDKDIR = C:/Program\ Files\ \(x86\)/HP\ webOS/PDK
+LFLAGS = -g -L${PDKDIR}/device/lib -LWALY -Wl,--allow-shlib-undefined
+G++ = arm-none-linux-gnueabi-g++
+
+# use these settings to target an emulator
+#PDKDIR = ../PDK
+#LFLAGS = -g -L../x86libs -LWALY -Wl,--allow-shlib-undefined
+#G++ = i686-pc-linux-gnu-g++
+
+INCLUDE = -I${PDKDIR}/include -I${PDKDIR}/include/SDL -IWALY
+LIBS = -lSDL_image -lSDL_ttf -lSDL_mixer -lSDL -lpdl -lstdc++ -lpthread
+
+include Make.inc
+
+WALY_HEADERS = Makefile WALY/WALY.h WALY/WALYButton.h WALY/WALYDataFile.h     \
+	       WALY/WALYDigitDraw.h WALY/WALYEntryBox.h WALY/WALYEntryBoxIP.h \
+	       WALY/WALYFilter.h WALY/WALYFont.h WALY/WALYFrame.h             \
+	       WALY/WALYImage.h WALY/WALYLabel.h WALY/WALYNetwork.h	      \
+	       WALY/WALYPlatform.h WALY/WALYScreen.h WALY/WALYSDLStubs.h      \
+	       WALY/WALYSound.h WALY/WALYWidget.h WALYmain.h
+WALY_FILES = WALYmain.o
+
+%.o: %.c ${HEADERS} ${WALY_HEADERS}
+	${G++} -c ${CFLAGS} -o $@ ${INCLUDE} $<
+
+%.o: %.cpp ${HEADERS} ${WALY_HEADERS}
+	${G++} -c ${CFLAGS} -o $@ ${INCLUDE} $<
+
+install: ../pkg/__PACKAGE_____VERSION_NAME___all.ipk
+	(cd .. ; palm-install.bat pkg/__PACKAGE_____VERSION_NAME___all.ipk)
+
+package: ../pkg/__PACKAGE_____VERSION_NAME___all.ipk
+
+../pkg/__PACKAGE_____VERSION_NAME___all.ipk: ../build/__CODE_NAME__
+	cp -pf ../icons/icon48.png ../build
+	rm -rf ../build/images
+	cp -prf ../assets/images ../build
+	rm -rf ../build/sounds
+	cp -prf ../assets/sounds ../build
+	(cd ../pkg ; palm-package.bat ../build)
+	@# old link ... broken now
+	@#(sudo rm -rf /media/shared/tmpCR ; sudo cp -pr ../__CODE_NAME__/media/shared/tmpCR)
+
+../build/__CODE_NAME__: ${OBJ_FILES} ${WALY_FILES} WALY/libWALY.a
+	${G++} ${LFLAGS} -o ../build/__CODE_NAME__ ${OBJ_FILES} ${WALY_FILES} -lWALY ${LIBS}
+
+WALY/libWALY.a::
+	(cd WALY ; make)
+
+clean::
+	rm -f *.o *~ *.stackdump
+	(cd WALY ; make clean)
+
+clear: clean
+	rm -f ../build/__CODE_NAME__ ../pkg/__PACKAGE_____VERSION_NAME___all.ipk
+	(cd WALY ; make clear)
+
