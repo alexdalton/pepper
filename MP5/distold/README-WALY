@@ -1,0 +1,369 @@
+What's in this directory?
+-------------------------
+
+information about *this* program
+  - README -- description of this program
+  - CHANGE_LOG -- description of changes over time
+  - KNOWN_ISSUES -- known lack of features and ... bugs, if any
+
+README-WALY -- this file, which describes use of the WALY library
+
+assets -- a directory containing 
+  - a subdirectory called "fonts" that contains freely available
+    true-type fonts; you can add more, if you want; webOS uses
+    its own, and Android uses a single scaled font
+  - a subdirectory called "sounds" that contains all sounds for the 
+    program (MP3 and WAV work; others may work, but may not be work
+    on all platforms)
+  - a subdirectory called "images" that contains all graphics for the 
+    program (PNG format only for portability)
+
+jni -- a directory containing source code for the program and 
+  - a WALY subdirectory containing the WALY library code
+  - a libpng subdirectory containing an implementation of libPNG for Android
+  - and some WALY source files that need to be in the top-level:
+      - WALYmain.h -- debug file (see DEBUG below) support
+      - WALYmain.cpp -- glue from platform to WALY_main (program entry point)
+
+icons -- a directory containing
+  - one 48x48 PNG image called icon48.png that serves as an icon for the 
+    program (see ICONS below)
+  - OPTIONALLY, up to four other sizes of the same icon
+      - icon32.png
+      - icon36.png
+      - icon72.png
+      - icon96.png
+  - and some things used for building Windows installers...
+      - icon48.ico
+      - installer.ico
+      - logo.bmp
+
+cross-platform builds...
+  - set-target -- a file used to prepare for building on one of the platforms
+  - target-files -- a directory containing prototypes of platform-specific files
+  - VALUES.def -- specification of values for this program
+
+licensing, etc.
+  - COPYING
+  - NO_WARRANTY
+
+-----------------------------------------------------------------------------
+
+
+INSTRUCTIONS FOR ALL PLATFORMS
+------------------------------
+
+Non-WALY sources and headers should be listed in jni/Make.inc.  Do not
+modify Makefiles directly--they are auto-generated.
+
+Using set-target to clean up creates a TRASH directory and dumps things 
+into it.  Object files, executables, stackdumps, and so forth are deleted 
+immediately, but final destruction of anything automatically-generated 
+that you were nonetheless foolhardy enough to change is left to you.
+
+-----------------------------------------------------------------------------
+
+
+INSTRUCTIONS FOR ANDROID
+------------------------
+
+What you'll need:
+   - Cygwin
+   - Android SDK and NDK
+   - Apache Ant (1.8.4 works)
+
+CAVEAT: You can use Apache Ant by itself, or can use ndk-build from the
+   command-line and then use Eclipse to build the package.
+
+For Android, you are encouraged to make icons in four distinct sizes 
+(see ICONS below).
+
+Now, how to set up...
+
+Set your target to Android.  In the main directory (with this file), type...
+
+    ./set-target android
+
+You will need to set the following environment variables:
+    - ANT_HOME points to your Ant directory (part of setting up Ant)
+    - JAVA_HOME points to your Java JDK directory (also part of setting up Ant)
+    - ANDROID_NDK_HOME points to the NDK directory
+    - ANDROID_SDK_HOME points to the sdk subdirectory of SDK directory
+
+Then you can build and install the code with Ant (connect your device first):
+    ant
+
+I haven't run on an emulator with this approach...shouldn't be hard.
+
+After build+install, you can start program and attach gdb with
+    ndk-gdb --start
+
+You can also build a release version:
+    ant release
+
+You will need to sign, zipalign, and install the resulting package yourself.
+Adding jarsigner to Ant apparently puts your password in cleartext on the
+screen, so ... don't do it that way.
+
+------
+(Old instructions for ndk-build + Eclipse...)
+
+Then you can build the code with NDK:
+
+    ndk-build
+
+Next, launch Eclipse, and choose menu option File/Import...
+    - in the dialog, choose Android/Existing Android Code into Workspace
+    - choose this directory (with this README file)
+    - press "Finish"
+
+Generally, building works like this...
+    - make some changes...
+    - run ndk-build *** in this directory (not in jni, etc.) ***
+    - maybe refresh Eclipse's file view by clicking the package and pressing F5
+    - select Project/Clean... (I usually clean all so I can just press Enter)
+    - push the 'run' button (white arrow on green circle)
+    - sometimes it hiccups if you press go too soon--doesn't like you to
+      be impatient (and fails to synch with auto-build); press 'go' again;
+      I've even had it pass broken code to device, so don't worry too much
+      if you're rushing and program dies--try running again after build
+      has finished in background
+
+And, to execute, launch as usual from the phone/emulator display.
+------
+
+KNOWN ISSUE: soft keyboard input with Android...backspace key is not 
+delivered to NDK, so ... use the smiley button for now.
+
+Debug output is on the phone/emulator, under /sdcard/Android/data/debug.
+You will have to create this directory before debug output files will 
+appear--to avoid accumulating cruft.
+
+Locally stored files are not accessible with Android (unless you have
+root on the phone), in which case ... they're wherever Android decides
+to put them.
+
+WARNING: If you change icons, put them in the icons directory, then
+         run 'set-target android' again.
+
+-----------------------------------------------------------------------------
+
+
+INSTRUCTIONS FOR LINUX
+----------------------
+
+What you'll need:
+   - SDL, GCC, etc.
+
+Now, how to set up...
+
+Set your target to Linux.  In the main directory (with this file), type...
+
+    ./set-target linux
+
+Then you can build the code with gmake:
+
+    make
+
+The executable will be placed in the main directory (with this file).
+To execute, just use the program name:
+
+    ./<name of your program>  (for example, ChickenRace)
+
+Debug output is under debug.
+
+Locally stored files are under storage.
+
+WARNING: If you change icon48 but not icon32, you need to delete icon32
+         and run 'set-target cygwin' again to recreate it.
+
+-----------------------------------------------------------------------------
+
+
+INSTRUCTIONS FOR CYGWIN
+------------------------
+
+What you'll need:
+   - Cygwin
+   - SDL, GCC, etc.
+
+Now, how to set up...
+
+Set your target to Cygwin.  In the main directory (with this file), type...
+
+    ./set-target cygwin
+
+Then you can build the code with gmake:
+
+    make
+
+The executable will be placed in the main directory (with this file).
+To execute, just use the program name:
+
+    ./<name of your program>  (for example, ChickenRace)
+
+Debug output is under debug.
+
+Locally stored files are under storage.
+
+WARNING: If you change icon48 but not icon32, you need to delete icon32
+         and run 'set-target cygwin' again to recreate it.
+
+-----------------------------------------------------------------------------
+
+
+BUILDING WINDOWS INSTALLERS UNDER CYGWIN
+----------------------------------------
+
+What (else) you'll need:
+   - NSIS (Nullsoft Installer System)
+
+First, you should create some new icons and bitmaps:
+   - icons/icon48.ico		optional (else created from icons/icon48.png0)
+   - icons/installer.ico	48x48-pixel icon for the installer
+   - icons/logo.bmp		400x72-pixel bit map used in the installer
+   				(usually a burst logo for your program)
+
+Make the code (make).
+Clean up the files (make clean).
+Then ... run the script.
+
+Installer will be in the top-level directory on success.
+
+NOTE: BY DEFAULT, SINCE YOU ARE USING CYGWIN, YOUR CODE WILL BE MARKED
+AND LICENSED AS GPL.  GPL IS STICKY.  DO NOT USE IT IF YOU DO NOT LIKE
+THAT FACT.   YOUR CODE ***WILL BE PACKAGED*** WITH THE INSTALLER, AND
+PEOPLE WHO HAVE THE INSTALLER ***WILL HAVE YOUR CODE***.
+
+Another couple of notes: you may want to turn off any debug output
+before you build an installer, or it will show up as a backgronded output
+window.  Also, if you have swap files from vi(m), NSIS will probably fail.
+Close them before building an installer.
+
+KNOWN ISSUES: unless you run them as admin, installed code will not be
+able to use local storage; and ... I need to figure out SysWOW...
+might only work on 64-bit Windows.
+
+-----------------------------------------------------------------------------
+
+
+INSTRUCTIONS FOR WEBOS
+------------------------
+
+What you'll need:
+   - Cygwin
+   - Palm Development Kit
+   - emulator, if you want it (uses VirtualBox)
+   - cross-platform compiler tools...now owned by Mentor Graphics;
+     I have a document that describes setting up for this build, but
+     it's unclear how long these tools will remain available
+
+CAVEAT: I use Cygwin to build everything, but Linux variants were
+   available in the past, too
+
+Now, how to set up...
+
+Set your target to WebOS.  In the main directory (with this file), type...
+
+    ./set-target webos
+
+(If you still happen to be running a 32-bit version of Windows, use
+"webos32" instead of "webos".)
+
+Then you can build the code with gmake:
+
+    make
+
+It's set up to package and download onto the phone.  Plug the phone in
+first.  If you want to run on an emulator, change the defines in the
+jni/Makefile and jni/WALY/Makefile as indicated, then recompile 
+(x86 instead of ARM).  Emulator... bit of a pain, really.  There's
+a document I have elsewhere, but you need to tweak libraries, etc.
+
+And, to execute, launch as usual from the phone display.  Emulator launch 
+has to be done from your build platform with Palm tools (not from the 
+emulated display).
+
+Debug output is under /media/internal/downloads.
+
+Locally stored files are under 
+/media/internal/appdata/<package name>
+
+Package files are unpacked under
+/media/cryptofs/apps/usr/palm/applications/<package name>
+
+(You can log in to the phone/emulator with 'ssh -p 10022 root@locahost'.)
+
+-----------------------------------------------------------------------------
+
+
+ICONS
+-----
+
+You *must* provide one 48x48 icon in PNG form.  Call it "icon48.png" and
+put it into the icons directory.
+
+You may also provide the same icon in four other sizes.  If you choose
+to do so, the files should also go into the icon directory and be called
+according to their (square) sizes in pixels:
+  - icon32.png		used for Windows (Cygwin)
+  - icon36.png		used for Android low-density displays
+  - icon72.png		used for Android high-density displays
+  - icon96.png		used for Android extra-high-density displays
+
+If you target Android, and you have the ImageMagick convert tool 
+installed, setting the target to Android will automatically generate 
+three other icons if you have not provided your own versions.
+
+If you target Cygwin or Linux, and you have the ImageMagick convert tool 
+installed, setting the target to Cygwin/Linux will automatically generate 
+a smaller (32x32) icon if you have not provided your own version.
+
+-----------------------------------------------------------------------------
+
+
+NETWORKING WITH WALY
+--------------------
+
+The networking model is just a simple peer-to-peer model.  Users will need
+to specify other users IP addresses--the ports have to match on a pairwise
+basis, and will need to know their own *real* IP address.  Network address
+translation (NAT, which is common with home networks/firewalls and virtual
+machines) will break the protocols.
+
+Connections are asynchronous: you create one, and later you will get a
+CONNECTION event either telling you that it failed or that you now have
+a connection.  You can decide which peer should 'lead' the interaction
+(you define lead) by calling shouldLead on the connection.  The protocol
+is based on TCP, but builds datagrams on top, so you will receive one
+NETWORK event per sendData from the other side, and you will receive
+one 0-length NETWORK on a connection when the other side has closed it
+(or the network has gone down, etc.).
+
+CONNECTION and NETWORK are delivered as with other callbacks, but are
+only delivered when one of your Frames has a registered callbacks.
+Inactive frames are counted--clear these callbacks if you do not expect
+to make use of them.  If events are delivered but do not reach the
+right callback because you didn't register it, tough luck for you.
+You are strongly encouraged to register exactly one callback only when
+you expect an event.
+
+I've made some attempt to keep you from deadlocking, but you cannot block
+trying to use the network with the application.  If you absolutely must
+send data and can't at the moment, set it aside and wait for a FRAME_UPDATE.
+If the application does not pull data out of the receive queue, you can
+cause deadlock.  If your peer starts to refuse data but leaves the 
+connection open (perhaps because they've paused the application), your
+sends will start to fail--at that point you may want to cut them off.
+
+Send small amounts of data in few packets.  It's better to do work on both
+sides than to use the network (probably from a battery life point of view,
+too--communication is expensive).  Try to use ping-pong exchanges rather
+than uncoordinated deluges of data going in both directions.  The latter
+may cause strange behavior because of delays in transmission.
+
+Don't forget to close a connection when you're done with it, or you may
+cause problems for your peer (not easy to detect when they're just ignoring
+you, any more than it would be if they just walked away from their machine).
+
+

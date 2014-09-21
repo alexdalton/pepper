@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BEGIN_INCLUDE(manifest) -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="__PACKAGE__"
+        android:versionCode="__VERSION_NUMBER__"
+        android:versionName="__VERSION_NAME__">
+
+    <!--                                                            -->
+    <!-- WARNING: THIS FILE HAS BEEN GENERATED AUTOMATICALLY BY     -->
+    <!-- WALY TARGET SETUP.  IF YOU WANT TO EDIT, EDIT THE ORIGINAL -->
+    <!-- IN target-files/android/AndroidManifest.xml.def            -->
+    <!--                                                            -->
+
+    <!-- This is the platform API where NativeActivity was introduced. -->
+    <uses-sdk android:minSdkVersion="14" />
+
+    <!-- This .apk has no Java code itself, so set hasCode to false. -->
+    <application android:label="@string/app_name" android:hasCode="true">
+
+        <!-- Our activity is the built-in NativeActivity framework class.
+             This will take care of integrating with our NDK code. -->
+        <activity android:name=".__CODE_NAME__"
+		android:icon="@drawable/icon"
+                android:label="@string/app_name"
+                android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize">
+            <!-- Tell NativeActivity the name of our .so -->
+            <meta-data android:name="android.app.lib_name"
+                    android:value="__CODE_NAME__" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+</manifest> 
+<!-- END_INCLUDE(manifest) -->

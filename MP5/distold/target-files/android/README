@@ -1,0 +1,7 @@
+The Apache License and NOTICE files are included because this package
+redistributes the file
+    android_native_app_glue.h
+from the Android NDK.
+
+It's easier than 'finding' the file, and I'm not sure that I trust their
+includes... should probably test that, though.  --SSL

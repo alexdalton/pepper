@@ -1,0 +1,50 @@
+As of 9 February 2013...
+
+The following platforms are verified to work...
+* Android
+* Cygwin
+* Linux
+* WebOS (from 32/64-bit Windows)
+
+KNOWN ISSUES include...
+
+Android
+* I'm using toggleSoftInput (which perhaps even *toggles* the soft input,
+  but it's unclear) instead of show/hide calls because show/hide calls
+  require extra arguments that I have no clue how to obtain...what a 
+  peculiar interface, eh?
+* backspace ... what a pain.  Use the smiley face to delete from keyboard.
+* may have some color issues related to endianness
+* don't use window sizes over 500x800...Android can't actually handle
+  scaling if you turn to landscape mode on Nexus 7 (with larger sizes)...
+(I strongly recommend use of host GPU to accelerate any emulation!)
+
+Windows Installers (Cygwin)
+* run as admin or you can't write to local storage (yech)
+* not sure that it will work on 32-bit windows, given that I'm including
+  64-bit libraries ('work' means both being able to *build* installers
+  as well as being able to *use* installers on 32-bit Windows)
+  ... did an install on my laptop (32-bit Vista)...seemed to be ok
+
+Cygwin (and maybe Linux)
+* sounds don't stop when iconified (only an issue for looping)
+* icons are getting fudged a bit...I'm using SDLimage (even though I'm
+  not supposed to do so before setting video mode), but loading bitmap
+  (even 256-color) instead did not fix the problem on my desktop
+
+WebOS
+* haven't fixed code to support window sizing on WebOS yet
+
+General
+* I will need to re-package networking before WALY can work across platforms
+  for the 190 lines game.  Shouldn't be too hard, I hope, but...
+  ** in retrospect, why am I using threads instead of non-blocking ops?
+     so I can be a bit lazy about managing buffers and events on poll?
+     I guess that must be it...that's what the threads buy me **
+* I could technically make the TTF fonts available on webOS, too... that
+  way things look the same except on Android?
+* Networking is ... flakier than I'd like.  Protocols break over NAT
+  (including VM-based NAT), and sender/receiver threads are not 
+  interrupted when connection they're using is cut/cancelled.
+
+

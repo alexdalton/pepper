@@ -1,0 +1,53 @@
+9 February 2013
+UIUC ECE198KL Spring 2013 Program 5 version 1.0.0
+
+-----------------------------
+   DESCRIPTION OF CONTENTS
+-----------------------------
+
+This program is an assignment based on WALY that I wrote for UIUC
+ECE198KL in February 2013.  This version runs on several platforms.
+
+The program and all components are (C) Copyright 2011-2013 by 
+Steven S. Lumetta.
+
+The program is free software covered by the GNU General Public
+License, and you are welcome to modify it and/or distribute copies of
+it it under certain conditions.  The file COPYING (included with the
+distribution) specifies those conditions.  There is absolutely no
+warranty for MazeRun, as described in the file NO_WARRANTY (also
+included in the distribution).  You must also include a verbatim copy
+of this file as part of a file called README in any distribution.
+
+
+---------------------
+   NECESSARY TOOLS
+---------------------
+
+Installation of the packaged Windows version should not require any
+tools.
+
+Installation from source requires versions of gcc (the Gnu C compiler)
+and make, which are available for free from many sources.  You will
+also need SDL and any related software.  I installed these from sources.
+For Windows, I recommend installing Cygwin.
+
+See the README-WALY for more detail on other platforms.
+
+
+-------------------------------
+   INSTALLATION INSTRUCTIONS
+-------------------------------
+
+To install the Windows version, launch the installer and follow the
+directions.  To install from source, type "make" in the source
+directory.
+
+By default, the Windows installer places all components as a
+subdirectory of the Program Files folder.  You can override this
+location as necessary.  
+
+Please send any comments or bug reports to me at lumetta@illinois.edu.
+Unfortunately, due to the volume of e-mail that I receive on a regular
+basis, I cannot guarantee that I will respond to your mail, but I will
+almost definitely read it.

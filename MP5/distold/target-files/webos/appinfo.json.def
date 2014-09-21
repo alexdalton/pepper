@@ -1,0 +1,9 @@
+{
+	"id": "__PACKAGE__",
+	"version": "__VERSION_NAME__",
+	"vendor": "__AUTHOR__",
+	"type": "pdk",
+	"main": "__CODE_NAME__",
+	"title": "__APP_DISPLAY_NAME__",
+	"icon": "icon48.png"
+}

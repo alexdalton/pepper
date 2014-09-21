@@ -1,0 +1,184 @@
+#
+# WARNING: THIS FILE HAS BEEN GENERATED AUTOMATICALLY BY
+# WALY TARGET SETUP.  IF YOU WANT TO EDIT, EDIT THE ORIGINAL
+# IN target-files/cygwin/installer.nsi.def
+#
+
+!include FileFunc.nsh
+!include Sections.nsh
+
+!insertmacro un.DirState
+
+!define AUTHOR       "__AUTHOR__"
+!define VERSION      "__VERSION_NAME__"
+!define COMPANYNAME  "__COMPANY_NAME__"
+!define COMPANYSTART "__COMPANY_DISPLAY_NAME__"
+!define INSTALLNAME  "__APP_DISPLAY_NAME__"
+!define INSTALLDIR   "__CODE_NAME__"
+!define COMPANYDIR   "${COMPANYNAME}"
+
+Name "${INSTALLNAME} ${VERSION}"
+Caption "${INSTALLNAME} Installer"
+OutFile "../${INSTALLNAME} ${VERSION} Installer.exe"
+XPStyle on
+
+VIADDVersionKey "ProductName" "${INSTALLNAME}"
+VIADDVersionKey "Comments" "SDL-based chicken race game ported from webOS"
+VIADDVersionKey "CompanyName" "${AUTHOR}"
+VIADDVersionKey "LegalCopyright" "${INSTALLNAME} and all components are (C) Copyright 2011-2013 by ${AUTHOR}.  All rights reserved."
+VIADDVersionKey "FileDescription" "Installer for ${INSTALLNAME} ${VERSION}"
+VIADDVersionKey "FileVersion" "${VERSION}"
+VIADDVersionKey "ProductVersion" "${VERSION}"
+VIProductVersion "${VERSION}.0.0"
+
+AddBrandingImage top 72
+ShowInstDetails nevershow
+ShowUninstDetails nevershow
+
+Icon "installer.ico"
+
+InstallDir "$PROGRAMFILES\${COMPANYDIR}\${INSTALLDIR}"
+InstallDirRegKey HKLM "Software\${COMPANYDIR}\${INSTALLDIR}" ""
+LicenseData show-license.txt
+
+Page license
+Page components
+Page directory
+UninstPage uninstConfirm
+
+Function .onGUIInit
+    SetOutPath $TEMP
+    File "/oname=$TEMP\${INSTALLNAME}_logo.bmp" "logo.bmp"
+    SetBrandingImage "$TEMP\${INSTALLNAME}_logo.bmp"
+FunctionEnd
+
+Function .onGUIEnd
+    Delete "$TEMP\${INSTALLNAME}_logo.bmp"
+FunctionEnd
+
+Function un.onGUIInit
+    SetOutPath $TEMP
+    File "/oname=$TEMP\${INSTALLNAME}_logo.bmp" "logo.bmp"
+    SetBrandingImage "$TEMP\${INSTALLNAME}_logo.bmp"
+FunctionEnd
+
+Function un.onGUIEnd
+    Delete "$TEMP\${INSTALLNAME}_logo.bmp"
+FunctionEnd
+
+PageEx instfiles
+    CompletedText "Installation is complete."
+PageExEnd
+
+PageEx un.instfiles
+    CompletedText "${INSTALLNAME} has been removed."
+PageExEnd
+
+# do not display--not optional
+Section ""
+    SetOutPath "$INSTDIR"
+    File /a "..\COPYING"
+    File /a "..\NO_WARRANTY"
+    File /a "..\README"
+    File /a "license.txt"
+    File /a /r "..\assets"
+    File "..\${INSTALLDIR}.exe"
+    File "icon.ico"
+    File "C:\cygwin\bin\cygwin1.dll"
+    #File "C:\cygwin\bin\cyggcc_s-1.dll"
+    #File "C:\cygwin\bin\cygfreetype-6.dll"
+    #File "C:\cygwin\bin\SDL.dll"
+    #File "C:\cygwin\bin\SDL_image.dll"
+    #File "C:\cygwin\bin\SDL_mixer.dll"
+    #File "C:\cygwin\bin\SDL_ttf.dll"
+    #File "C:\cygwin\bin\cygpng14-14.dll"
+    #File "C:\cygwin\bin\cygz.dll"
+    File "C:\Windows\SysWOW64\SDL.dll"
+    File "C:\Windows\SysWOW64\SDL_image.dll"
+    File "C:\Windows\SysWOW64\SDL_mixer.dll"
+    File "C:\Windows\SysWOW64\SDL_ttf.dll"
+    File "C:\Windows\SysWOW64\libfreetype.dll"
+    File "C:\Windows\SysWOW64\zlib1.dll"
+    File "C:\Windows\SysWOW64\libpng12-0.dll"
+    SetFileAttributes "$INSTDIR\${INSTALLNAME}.ico" NORMAL|HIDDEN
+SectionEnd
+
+Section "Add shortcuts to the Start Menu"
+    # determines starting directory for shortcuts
+    SetOutPath "$INSTDIR"
+    SetShellVarContext All
+    StrCpy $0 "$SMPROGRAMS\${COMPANYSTART}\${INSTALLDIR}"
+    CreateDirectory $0
+    CreateShortCut "$0\${INSTALLNAME}.lnk" "$INSTDIR\${INSTALLDIR}.exe" "" \
+	    "$INSTDIR\icon.ico" 0 SW_SHOWMINIMIZED
+    CreateShortCut "$0\${INSTALLNAME} License.lnk" "$INSTDIR\license.txt"
+    CreateShortCut "$0\Uninstall ${INSTALLNAME}.lnk" "$INSTDIR\uninstall.exe"
+SectionEnd
+
+Section "Add a shortcut to the Desktop"
+    # determines starting directory for shortcuts
+    SetOutPath "$INSTDIR"
+    SetShellVarContext Current
+    CreateShortCut "$DESKTOP\${INSTALLNAME}.lnk" "$INSTDIR\${INSTALLDIR}.exe" \
+	    "" "$INSTDIR\icon.ico" 0 SW_SHOWMINIMIZED
+SectionEnd
+
+Section "Source Files" src_section_id
+    SetOutPath "$INSTDIR\${INSTALLNAME} sources"
+    File /a "..\CHANGE_LOG"
+    File /a "..\COPYING"
+    File /a "..\NO_WARRANTY"
+    File /a "..\README"
+    File /a "..\set-target"
+    File /a "..\VALUES.def"
+    File /a "..\README-WALY"
+    File /a /r "..\assets"
+    File /a /r "..\icons"
+    File /a /r "..\jni"
+    File /a /r "..\target-files"
+SectionEnd
+
+Section -post
+    # save install directory name
+    WriteRegStr HKLM "Software\${INSTALLNAME}" "" "$INSTDIR"
+
+    # uninstall information
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTALLNAME}" "DisplayName" "${INSTALLNAME}"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTALLNAME}" "InstallLocation" "$INSTDIR"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTALLNAME}" "DisplayIcon" "$INSTDIR\icon.ico,1"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTALLNAME}" "UninstallString" "$INSTDIR\uninstall.exe"
+    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTALLNAME}" "NoModify" "1"
+    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTALLNAME}" "NoRepair" "1"
+    # need "Publisher"
+    # need "DisplayVersion"
+
+    WriteUninstaller "$INSTDIR\uninstall.exe"
+SectionEnd
+
+Section "Uninstall"
+    SetOutPath "C:\"
+    RMDir /r "$INSTDIR"
+    # don't force parent directory removal; leave any other games
+    # seems to have problems going down and up through non-existent dir...
+    RMDir "$PROGRAMFILES\${COMPANYDIR}"
+    # remove start menu folder
+    SetShellVarContext All
+    RMDir /r "$SMPROGRAMS\${COMPANYSTART}\${INSTALLDIR}"
+    # again, don't force parent directory removal; leave any other games
+    RMDir "$SMPROGRAMS\${COMPANYSTART}"
+    # remove desktop shortcut
+    SetShellVarContext Current
+    Delete "$DESKTOP\${INSTALLNAME}.lnk"
+
+    # remove registry keys
+    DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTALLNAME}"
+    DeleteRegKey HKLM "Software\${INSTALLNAME}"
+SectionEnd
+
+# must be placed after definition of src_section_id
+Function .onInit
+    SectionGetFlags ${src_section_id} $0
+    IntOp $0 $0 & ~${SF_SELECTED}
+    SectionSetFlags ${src_section_id} $0
+FunctionEnd
+
