@@ -31,5 +31,17 @@ int main(void)
  * */
 void printGCF(int val1, int val2)
 {
-    // INSERT YOUR CODE HERE
+    int loopCount, i, currentGCF;
+    if (val1 < val2)
+        loopCount = val1;
+    else
+        loopCount = val2;
+    for (i = 1; i <= loopCount; i++)
+    {
+        if (!(val1 % i) && !(val2 % i))
+        {
+            currentGCF = i;
+        }
+    }
+    printf("The GCF of %d and %d is %d\n", val1, val2, currentGCF);
 }
