@@ -16,13 +16,13 @@ int set_seed (const char* seed_str);
 int start_game (int* one, int* two, int* three, int* four);
 
 /*
- * Called when the user enters a string t make a guess.  Returns 0 if the
+ * Called when the user enters a string to make a guess. Returns 0 if the
  * guess is invalid, whether because it does not correspond to a sequence
  * of four numbers or because any of the numbers is outside of the range
  * 1 to 8.  Returns 1 on success, copies the guessed values into the
  * integer pointers passed to the function, and prints a message using the
  * format given in the specification to tell the player how many perfect
- * and misplaced matches were found for the guess made.
+ * high, and low matches were found for the guess made.
  */
 int make_guess (const char* guess_str, int* one, int* two, 
 		    int* three, int* four);

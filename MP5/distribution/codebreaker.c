@@ -30,6 +30,7 @@ static int peg1;
  */
 int set_seed (const char* seed_str)
 {
+    // REPLACE THIS WITH YOUR OWN CODE
     srand(12345);
     return 1;
 }
@@ -48,6 +49,7 @@ int set_seed (const char* seed_str)
  */
 int start_game (int* one, int* two, int* three, int* four)
 {
+    // REPLACE THIS WITH YOUR OWN CODE
     *one   = 1;
     *two   = 1;
     *three = 1;
@@ -57,7 +59,7 @@ int start_game (int* one, int* two, int* three, int* four)
 
 
 /*
- * make_guess -- calculates the number of perfect and misplaced matches
+ * make_guess -- calculates the number of perfect, high, and low matches
  *               for a given guess, relative to the solution code recorded
  *               earlier by start_game
  * INPUTS: guess_str -- a string consisting of four numbers for the guess
@@ -69,13 +71,14 @@ int start_game (int* one, int* two, int* three, int* four)
  *          *four -- the fourth color value in the guessed code
  *                    (between 1 and 8)
  * RETURN VALUE: 1 if the guess string is valid (represents exactly four
- *               numbers between 1 and 8), or if it is not
+ *               numbers between 1 and 8), or if 0 it is not
  * SIDE EFFECTS: prints the number of matches found using printf
  *               (NOTE: the output format MUST MATCH EXACTLY)
  */
 int make_guess (const char* guess_str, int* one, int* two, 
 	    int* three, int* four)
 {
+    // REPLACE THIS WITH YOUR OWN CODE
     return 0;
 }
 
