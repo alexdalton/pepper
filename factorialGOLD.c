@@ -8,7 +8,7 @@
     printf("Enter n: ");
     scanf("%d", &n);
                                
-    if ((n < 1) || (n > 30)) {
+    if ((n < 1) || (n > 12)) {
         printf("Number out of range.\n");
         return -1;
     }
