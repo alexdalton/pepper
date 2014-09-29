@@ -23,7 +23,7 @@ def main():
     robot.DriveDistance(300, 1400)
     robot.TurnAngle(200, 17, "ccw")
     robot.DriveDistance(300, 610)
-    robot.TurnAngle(200, 70, "cw")
+    robot.TurnAngle(200, 65, "cw")
 
     robot.DriveStraight(300)
     while(not robot.sensors.GetBump()):
@@ -31,7 +31,7 @@ def main():
     robot.Stop()
 
     robot.DriveDistance(-300, 480)
-    robot.TurnAngle(200, 70, "ccw")
+    robot.TurnAngle(200, 65, "ccw")
     robot.DriveDistance(300, 1562)
     robot.TurnAngle(200, 70, "cw")
 
