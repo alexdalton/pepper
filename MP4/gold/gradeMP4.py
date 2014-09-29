@@ -1,5 +1,6 @@
 import subprocess
 import os
+import string
 from optparse import OptionParser
 
 parser = OptionParser()
@@ -27,6 +28,18 @@ except IOError as e:
     print("I/O error({0}): {1} {2}".format(e.errno, rosterPath, e.strerror))
     exit(1)
 
+cwd = os.getcwd()
 for student in roster:
-    studentDir = os.path.join(mpDirectory, student)
+    studentDir = os.path.join(mpDirectory, string.rstrip(student, '\n'))
+    os.chdir(studentDir)
+    subprocess.call(["cp", "/home/adalton2/pepper/MP4/gold/printBinary.o", os.path.join(studentDir, "printBinary.o")])
+    subprocess.call(["cp", "/home/adalton2/pepper/MP4/distribution/Makefile", studentDir])
+    results = open("results.txt", "w")
+    results.write("***** Compilation Results *****\n")
+    compile_results = subprocess.Popen(["make"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+    results.write(compile_results[0])
+    if compile_results[1]:
+        results.write(compile_results[1])
+    results.close()
 
+os.chdir(cwd)
