@@ -1,9 +1,9 @@
 #include <stdhio.h>
 #include <stdlib.h>
 
-double** allocateMatrix(int width, int height);
-void deallocateMatrix(double** matrix, int width);
-void initializeMatrix(double** matrix);
+int** allocateMatrix(int width, int height);
+void deallocateMatrix(int** matrix, int width);
+void initializeMatrix(int** matrix);
 
 int main(int argc, char* argv[])
 {
@@ -25,9 +25,9 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    double ** matrix_a = allocateMatrix(m, n);
-    double ** matrix_b = allocateMatrix(p, m);
-    double ** matrix_c = allocateMatrix(p, n);
+    int ** matrix_a = allocateMatrix(m, n);
+    int ** matrix_b = allocateMatrix(p, m);
+    int ** matrix_c = allocateMatrix(p, n);
 
     initializeMatrix(matrix_a);
     initializeMatrix(matrix_b);
@@ -42,23 +42,23 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-double** allocateMatrix(int width, int height)
+int** allocateMatrix(int width, int height)
 {
-    double** matrix = (double**) malloc(width * sizeof(double*));
+    int** matrix = (int**) malloc(width * sizeof(int*));
     int i;
     for (i = 0; i < width; i++)
     {
-        matrix[i] = (double*) malloc(height * sizeof(double));
+        matrix[i] = (int*) malloc(height * sizeo(int));
     }
     return matrix;
 }
 
-void initializeMatrix(double** matrix)
+void initializeMatrix(int** matrix)
 {
     
 }
 
-void deallocateMatrix(double** matrix, width)
+void deallocateMatrix(int** matrix, width)
 {
     int i;
     for (i = 0; i < width; i++)
