@@ -1,9 +1,12 @@
 #include <stdhio.h>
 #include <stdlib.h>
 
+/********* FUNCTION DEFINITIONS *********/
 int** allocateMatrix(int width, int height);
 void deallocateMatrix(int** matrix, int width);
 void initializeMatrix(int** matrix);
+void matrixMultiply(int** matrix_a, int** matrix_b, int** matrix_c);
+
 
 int main(int argc, char* argv[])
 {
@@ -29,6 +32,7 @@ int main(int argc, char* argv[])
     int ** matrix_b = allocateMatrix(p, m);
     int ** matrix_c = allocateMatrix(p, n);
 
+    srand(12321);
     initializeMatrix(matrix_a);
     initializeMatrix(matrix_b);
 
@@ -38,8 +42,12 @@ int main(int argc, char* argv[])
     deallocateMatrix(matrix_b, p);
     deallocateMatrix(matrix_c, p);
 
-    
     return 0;
+}
+
+void matrixMultiply(int** matrix_a, int** matrix_b, int** matrix_c)
+{
+
 }
 
 int** allocateMatrix(int width, int height)
@@ -53,11 +61,25 @@ int** allocateMatrix(int width, int height)
     return matrix;
 }
 
-void initializeMatrix(int** matrix)
+void initializeMatrix(int** matrix, int width, int height)
 {
-    
+   int i, j;
+   for (i = 0; i < width; i++)
+   {
+       for (j = 0; j < height; j++)
+       {
+           matrix[i][j] = rand() % 5000;
+       }
+   }
 }
 
+/*
+ * FUNCTION:     deallocateMatrix
+ * INPUT:        matrix - 2D array of integers
+ *               width  - width of the matrix
+ * SIDE EFFECTS: frees memory for the given matrix
+ * OUTPUT:       none
+ */
 void deallocateMatrix(int** matrix, width)
 {
     int i;
