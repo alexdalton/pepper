@@ -45,15 +45,20 @@ int main(void)
 
     // Compute matrix multiplication and write to matrix_c
     // INSERT YOUR CODE HERE
+    int row, col, sum, k;
+    for (row = 0; row < DIM_N; row++)
+    {
+        for (col = 0; col < DIM_P; col++)
+        {
+            sum = 0;
+            for(k = 0; k < DIM_M; k++)
+            {
+                sum += matrix_a[k][row] * matrix_b[col][k];
+            }
+            matrix_c[col][row] = sum;
+        }
 
-
-
-
-
-
-
-
-
+    }
 
     // Print matrix C
     printf("Matrix C: %d x %d\n", DIM_N, DIM_P);
