@@ -1,8 +1,8 @@
 CC=gcc
-CFLAGS= -g -Wall -Werror -Wextra
+CFLAGS= -Wall -Werror -Wextra
 
-django: django.c
-	$(CC) $(CLFAGS) django.c -o django
+django: matrixmult.c
+	$(CC) $(CLFAGS) matrixmult.c -o matrixmult
 
 clean:
-	rm -f *.o django
+	rm -f *.o matrixmult
