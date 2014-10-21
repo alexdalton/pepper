@@ -1,177 +1,86 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/********* FUNCTION DEFINITIONS *********/
-int** allocateMatrix(int width, int height);
-void deallocateMatrix(int** matrix, int width);
-void initializeMatrix(int** matrix, int width, int height);
-void matrixMultiply(int** matrix_a, int** matrix_b, int** matrix_c, int n, int m, int p);
-void printMatrix(int** matrix, char name, int width, int height);
+/* We will grade your code by changing these values
+ * So test different matrice sizes by changing these */
 
-int main(int argc, char* argv[])
+#define DIM_N      12    // The n dimension (height of A and C)
+#define DIM_M      13    // The m dimension (width of A and height of B)
+#define DIM_P      14    // The p dimension (width of B and C)
+
+
+/* Please do NOT change any of the given code */
+int main(void)
 {
-    int n, m, p;
-    char post[2];
+    int matrix_a[DIM_M][DIM_N]; // First matrix to be multiplied
+    int matrix_b[DIM_P][DIM_M]; // Second matrix to be multiplied
+    int matrix_c[DIM_P][DIM_N]; // Output matrix of the multiplication
 
-    // Check for correct number of arguments
-    if (argc < 4)
-    {
-        printf("Not enough arguments, must enter in matrix dimensions\n");
-        printf("Usage: ./matrix n m p\n");
-        return 1;
-    }
-    else if (argc > 4)
-    {
-        printf("Too many arguments\n");
-        printf("Usage: ./matrix n m p\n");
-        return 1;
-    }
+    // If you choose to use i and j variables note they are declared here
+    int i, j;                     
+    srand(12321);
 
-    // Get n, m, and p arguments
-    if(1 != sscanf(argv[1], "%d%1s", &n, post) ||
-       1 != sscanf(argv[2], "%d%1s", &m, post)  ||
-       1 != sscanf(argv[3], "%d%1s", &p, post))
+    // Initialize and print matrix A
+    printf("Matrix A: %d x %d\n", DIM_N, DIM_M);
+    for (i = 0; i < DIM_N; i++)
     {
-        printf("Invalid arguments\n");
-        printf("Usage: ./matrix n m p\n");
-        return 1;
+        for (j = 0; j < DIM_M; j++)
+        {
+            matrix_a[j][i] = rand() % 10;
+            printf("%d   ", matrix_a[j][i]);
+        }
+        printf("\n");
     }
 
-    // allocate memory for matrices
-    int ** matrix_a = allocateMatrix(m, n);
-    int ** matrix_b = allocateMatrix(p, m);
-    int ** matrix_c = allocateMatrix(p, n);
-
-    // initialize random number generator and matrices with values
-    srand(12321);   // please don't change this seed value
-    initializeMatrix(matrix_a, m, n);
-    initializeMatrix(matrix_b, p, m);
-
-    // compute matrix multiplication
-    matrixMultiply(matrix_a, matrix_b, matrix_c, n, m, p);
-
-    printMatrix(matrix_a, 'A', m, n);
-    printMatrix(matrix_b, 'B', p, m);
-    printMatrix(matrix_c, 'C', p, n);
-
-    // deallocate memory for matrices
-    deallocateMatrix(matrix_a, m);
-    deallocateMatrix(matrix_b, p);
-    deallocateMatrix(matrix_c, p);
-
-    return 0;
-}
-
-/*
- * FUNCTION:     matrixMultiply
- * INPUT:        matrix_a - the A matrix for the matrix multiplication
- *               matrix_b - the B matrix for the matrix multiplication
- *               matrix_c - the C matrix, this holds the result of A x B
- * SIDE EFFECTS: matrix_c is written to and holds the result of A x B
- * OUTPUT:       none
- */
-void matrixMultiply(int** matrix_a, int** matrix_b, int** matrix_c, int n, int m, int p)
-{
-    int row, col, sum, i;
-    for (row = 0; row < n; row++)
+    // Initialize and print matrix B
+    printf("Matrix B: %d x %d\n", DIM_M, DIM_P);
+    for (i = 0; i < DIM_M; i++)
     {
-        for (col = 0; col < p; col++)
+        for (j = 0; j < DIM_P; j++)
+        {
+            matrix_b[j][i] = rand() % 10;
+            printf("%d   ", matrix_b[j][i]);
+        }
+        printf("\n");
+    }
+
+    // Compute matrix multiplication and write to matrix_c
+    // INSERT YOUR CODE HERE
+    int row, col, sum, k;
+    for (row = 0; row < DIM_N; row++)
+    {
+        for (col = 0; col < DIM_P; col++)
         {
             sum = 0;
-            for(i = 0; i < m; i++)
+            for(k = 0; k < DIM_M; k++)
             {
-                sum += matrix_a[i][row] * matrix_b[col][i];
+                sum += matrix_a[k][row] * matrix_b[col][k];
             }
             matrix_c[col][row] = sum;
         }
 
     }
-}
 
-/*
- * FUNCTION:     printMatrix
- * INPUT:        matrix - the matrix to print
- *               name   - a character representing the name of the matrix
- *               width  - the width of the matrix
- *               height - the height of the matrix
- * SIDE EFFECTS: prints the matrix in a readable format
- * OUTPUT:       none
- */
-void printMatrix(int** matrix, char name, int width, int height)
-{
-    int row, col;
-    printf("Matrix %c: %d x %d\n", name, height, width);
-    for (row = 0; row < height; row++)
+    // Print matrix C
+    printf("Matrix C: %d x %d\n", DIM_N, DIM_P);
+    for (i = 0; i < DIM_N; i++)
     {
-        for (col = 0; col < width; col++)
+        for (j = 0; j < DIM_P; j++)
         {
-            int value = matrix[col][row];
-            int spaceCount = 5;
+            int value = matrix_c[j][i];
+            int spaceCount = 4;
             while (value >= 10)
             {
                 value /= 10;
                 spaceCount -= 1;
             }
-            printf("%d", matrix[col][row]);
+            printf("%d", matrix_c[j][i]);
             for(;spaceCount > 0; spaceCount--)
                 printf(" ");
         }
         printf("\n");
     }
-    printf("======================\n");
+
+    return 0;
 }
 
-/* 
- * FUNCTION:     allocateMatrix
- * INPUT:        width  - width of matrix to allocate
- *               height - height of matrix to allocate
- * SIDE EFFECTS: allocates memory for a width x height matrix
- * OUPUT:        an int** (2D array). This is the matrix.
- */
-int** allocateMatrix(int width, int height)
-{
-    int** matrix = (int**) malloc(width * sizeof(int*));
-    int i;
-    for (i = 0; i < width; i++)
-    {
-        matrix[i] = (int*) malloc(height * sizeof(int));
-    }
-    return matrix;
-}
-
-/*
- * FUNCTION:     initializeMatrix
- * INPUT:        matrix - 2D array to initialize with values
- *               width  - width of 2D array
- *               height - height of 2D array
- * SIDE EFFECTS: initializes 2D array with random values between 0 and 4999
- * OUPUT:        none
- */
-void initializeMatrix(int** matrix, int width, int height)
-{
-   int i, j;
-   for (i = 0; i < height; i++)
-   {
-       for (j = 0; j < width; j++)
-       {
-           matrix[j][i] = rand() % 10;
-       }
-   }
-}
-
-/*
- * FUNCTION:     deallocateMatrix
- * INPUT:        matrix - 2D array of integers
- *               width  - width of the matrix
- * SIDE EFFECTS: frees memory for the given matrix
- * OUTPUT:       none
- */
-void deallocateMatrix(int** matrix, int width)
-{
-    int i;
-    for (i = 0; i < width; i++)
-    {
-        free(matrix[i]);
-    }
-    free(matrix);
-}
