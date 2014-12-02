@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "calculate.h"
+#include "mp12.h"
 
 #define POSTFIX 0
 #define INFIX   1

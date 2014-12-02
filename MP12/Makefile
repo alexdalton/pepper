@@ -1,17 +1,14 @@
 CC=g++
 CFLAGS=-g -Wall
 
-mp12: main.o stack.o calculate.o
-	$(CC) $(CFLAGS) main.o stack.o calculate.o -o mp12
+mp12: main.o mp12.o
+	$(CC) $(CFLAGS) main.o mp12.o -o mp12
 
 main.o:
 	$(CC) $(CLFAGS) -c main.c
 
-stack.o:
-	$(CC) $(CFLAGS) -c stack.c
-
-calculate.o:
-	$(CC) $(CFLAGS) -c calculate.c
+mp12.o:
+	$(CC) $(CFLAGS) -c mp12.c
 
 clean:
 	rm -f *.o mp12

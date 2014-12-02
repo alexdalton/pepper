@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "calculate.h"
-#include "stack.h"
+#include "mp12.h"
 
 /* Given the root of a tree, frees the tree structure from memory */
 void delete_tree(node * curNode)
@@ -14,7 +13,7 @@ void delete_tree(node * curNode)
 	free(curNode);
 }
 
-node * create_tree(char * exp_str)
+node * create_postfix_tree(char * exp_str)
 {
 	unsigned int i;
 	stack s1;
@@ -33,8 +32,8 @@ node * create_tree(char * exp_str)
 				new_node->item = c;
 				new_node->right = stackPop(&s1);
 				new_node->left = stackPop(&s1);
-                printf("Pushing: %c with left %c and right %c\n", new_node->item,
-                       new_node->left->item, new_node->right->item);
+                //printf("Pushing: %c with left %c and right %c\n", new_node->item,
+                //       new_node->left->item, new_node->right->item);
 				stackPush(&s1, new_node);
 				break;
             }
@@ -44,7 +43,7 @@ node * create_tree(char * exp_str)
 				new_node->item = c;
 				new_node->left = NULL;
 				new_node->right = NULL;
-                printf("Pushing: %c\n", new_node->item);
+                //printf("Pushing: %c\n", new_node->item);
 				stackPush(&s1, new_node);
 				break;
             }
@@ -53,7 +52,7 @@ node * create_tree(char * exp_str)
 	return stackPop(&s1);
 }
 
-int evaluate(node * curNode)
+int evaluate_postfix(node * curNode)
 {
 	if (curNode->left == NULL && curNode->right == NULL)
 		return (int) curNode->item - '0';
@@ -62,13 +61,13 @@ int evaluate(node * curNode)
     switch(operation)
     {
         case '+':
-            return evaluate(curNode->left) + evaluate(curNode->right); 
+            return evaluate_postfix(curNode->left) + evaluate_postfix(curNode->right); 
         case '-':
-            return evaluate(curNode->left) - evaluate(curNode->right); 
+            return evaluate_postfix(curNode->left) - evaluate_postfix(curNode->right); 
         case '*':
-            return evaluate(curNode->left) * evaluate(curNode->right); 
+            return evaluate_postfix(curNode->left) * evaluate_postfix(curNode->right); 
         case '/':
-            return evaluate(curNode->left) / evaluate(curNode->right);
+            return evaluate_postfix(curNode->left) / evaluate_postfix(curNode->right);
         default:
             return 0; 
     }
@@ -76,12 +75,37 @@ int evaluate(node * curNode)
 
 void postfix(char * exp_str)
 {
-	node * root = create_tree(exp_str);
-	printf("%d\n", evaluate(root));
+	node * root = create_postfix_tree(exp_str);
+	printf("%d\n", evaluate_postfix(root));
 	delete_tree(root);
 }
 
 void infix(char * exp_str)
 {
     // CHALLENGE CODE GOES HERE
+}
+
+void stackInit(stack * myStack)
+{
+	myStack->top = -1;
+}
+
+void stackPush(stack * myStack, node * element)
+{
+	if (myStack->top >= (MAXSIZE - 1))
+	{
+		printf("Can't push onto stack: stack is full\n");
+		return;
+	}
+	myStack->contents[++myStack->top] = element;
+}
+
+node * stackPop(stack * myStack)
+{
+	if(myStack->top < 0)
+	{
+		printf("Can't pop off stack: stack is empty\n");
+		return NULL;
+	}
+	return myStack->contents[myStack->top--];
 }
