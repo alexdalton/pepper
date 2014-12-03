@@ -23,6 +23,7 @@ node * create_postfix_tree(char * exp_str)
 		char c = exp_str[i];
 		switch(c)
 		{
+            case ' ': break;
 			case '+':
 			case '-':
 			case '*':

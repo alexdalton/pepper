@@ -7,17 +7,25 @@
 
 int main(int argc, char *argv[])
 {
-	if (argc < 3) 
+	if (argc < 2) 
 	{
 		printf("Not enough arguments provided.\n");
 		return -1;
 	}
-
+    char buf[100];
 	int notation_type = atoi(argv[1]);
     if (notation_type == POSTFIX)
-    	postfix(argv[2]);
+    {
+        printf("Please enter a postfix expression: ");
+        scanf("%[^\n]", buf);
+    	postfix(buf);
+    }
     else if (notation_type == INFIX)
-    	infix(argv[2]);
+    {
+        printf("Please enter an infix expression: ");
+        scanf("%[^\n]", buf);
+    	infix(buf);
+    }
     else
     {
     	printf("Invalid notation type\n");
