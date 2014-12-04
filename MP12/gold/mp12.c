@@ -81,9 +81,85 @@ void postfix(char * exp_str)
 	delete_tree(root);
 }
 
+int get_precedence(char c)
+{
+    switch (c)
+    {
+        case '*': return 10;
+        case '/': return 10;
+        case '+': return 9;
+        case '-': return 9;
+        default: return 0;
+    }
+}
+
+int is_op(char c)
+{
+    return (c == '*') || (c == '/') || (c == '+') || (c == '-');
+}
+
 void infix(char * exp_str)
 {
-    // CHALLENGE CODE GOES HERE
+	unsigned int i;
+    int top = -1;
+    char stack[100];
+    char output[100];
+    int outputSize = 0;
+	for (i = 0; i < strlen(exp_str); i++)
+	{
+		char c = exp_str[i];
+		switch(c)
+		{
+            case ' ': break;
+			case '+': 
+			case '-':
+			case '*':
+			case '/':
+            {
+                while (top >= 0 && is_op(stack[top]) && get_precedence(c) <= get_precedence(stack[top]))
+                {
+                    output[outputSize++] = stack[top--];
+                    //printf("122 Popping: %c\n", output[outputSize - 1]);
+                }
+                //printf("124 Pushing: %c\n", c);
+                stack[++top] = c; 
+                break;				
+            }
+            case '(': 
+            {
+                stack[++top] = c;
+                //printf("128 Pushing: %c\n", c);
+                break;
+            }
+            case ')':
+            {
+                while (top >= 0 && stack[top] != '(')
+                {
+                    output[outputSize++] = stack[top--];
+                    //printf("132 Popping: %c\n", output[outputSize - 1]);
+                }
+                if (top >= 0 && stack[top] == '(')
+                    //printf("136 Popping: (\n");
+                    top--;
+                break;
+            }
+			default:
+            {
+                output[outputSize++] = c;
+                output[outputSize] = '\0';
+                //printf("142 Output: %s\n", output);
+				break;
+            }
+	    }
+    }
+    while (top >= 0)
+    {
+        output[outputSize++] = stack[top--];
+        //printf("150 Popping: %c\n", output[outputSize - 1]);
+    }
+    output[outputSize] = '\0';
+    //printf("%s\n", output);
+    postfix(output); 
 }
 
 void stackInit(stack * myStack)
