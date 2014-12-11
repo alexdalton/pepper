@@ -1,3 +1,5 @@
+#ifndef VEC
+#define VEC
 #define MAXSIZE 100
 
 /* A vector structure
@@ -23,3 +25,5 @@ void pushBack(vector * inVector, int element);
 
 // Pops an element off the back of the vector
 int popBack(vector * inVector);
+
+#endif /*!VEC*/

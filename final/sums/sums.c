@@ -12,7 +12,7 @@ int main(int argc, char * argv[])
     if (argc < 2)
     {
         printf("Not enough arguments\n");
-        return;
+        return -1;
     }
 
     node * root = create_tree(argv[1]);
@@ -30,9 +30,10 @@ void findPathRecursive(node * root, int expectedSum, int currentSum, vector * pa
 
     if( currentSum == expectedSum && root->left == NULL && root->right == NULL)
     {
-        while(path->top >= 0)
+        int i;
+        for (i = 0; i <= path->back; i++)
         {
-            printf("%d ", popBack(path));
+            printf("%d ", path->contents[i]);
         }
         printf("\n");
     }

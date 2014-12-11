@@ -1,5 +1,5 @@
+#include <stdio.h>
 #include "vector.h"
-
 
 /*  vectorInit - initializes a vector structure
 *   INPUT: inVector - a pointer to the vector structure to initialize
