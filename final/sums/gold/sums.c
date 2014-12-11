@@ -21,6 +21,7 @@ int main(int argc, char * argv[])
     scanf("%d", &sum);
 
     findPath(root, sum);
+    delete_tree(root);
 }
 
 void findPathRecursive(node * root, int expectedSum, int currentSum, vector * path)
