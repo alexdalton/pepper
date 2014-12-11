@@ -25,11 +25,14 @@ int main(int argc, char * argv[])
     delete_tree(root);
 }
 
+// Recursive helper function for printing paths within a tree
+// that add up to an expected sum
 void findPathRecursive(node * root, int expectedSum, int currentSum, vector * path)
 {
     // YOUR CODE HERE
 }
 
+// Finds and prints all paths within a tree that add to an expected sum
 void findPath(node * root, int expectedSum)
 {
     // YOUR CODE HERE
