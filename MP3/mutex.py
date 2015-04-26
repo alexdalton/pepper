@@ -4,9 +4,11 @@ from optparse import OptionParser
 import threading
 import time
 import Queue
+import random
 
 
 # global queues for message passing between threads
+queueLock = threading.Lock()
 g_msg = {}
 # global dictionary to store thread handles indexed by node ID
 n_threads = {}
@@ -23,11 +25,15 @@ class message():
 
     def send(self):
         # sends a message to a node/s does not wait for a response
+        #print("Send: {0} from {1} to {2}".format(self.msg, self.from_id, self.to_id))
         if type(self.to_id) is list:
+            queueLock.acquire()
             for to_id in self.to_id:
                 g_msg[to_id].put([self.from_id, self.msg, self.msg_args])
         elif type(self.to_id) is int:
+            queueLock.acquire()
             g_msg[self.to_id].put([self.from_id, self.msg, self.msg_args])
+        queueLock.release()
 
     def send_and_get_response(self):
         # sends a message to a node and waits for a response
@@ -54,6 +60,7 @@ class NodeThread(threading.Thread):
         self.numReplies = 0
         self.voted = False
         self.requestQueue = Queue.PriorityQueue()
+        self.threadsFound = 0
 
         # set state to be init (state = 0)
         self.state = 0
@@ -69,7 +76,7 @@ class NodeThread(threading.Thread):
             if col == myCol or row == myRow:
                 self.votingSet.append(i)
 
-        print(self.node_id, self.votingSet)
+        #print(self.node_id, self.votingSet)
         # set node as alive
         self.alive = True
 
@@ -80,67 +87,54 @@ class NodeThread(threading.Thread):
         #self.receiveThread = receiveThread(self.node_id, self.N)
 
     def run(self):
-        # send hello to N threads
-        message(self.node_id, range(0, self.N), "hello").send()
-
-        # receive N hello messages before entering request state
-        count = 0
-        while(count < self.N):
-            if not g_msg[self.node_id].empty():
-                msg = g_msg[self.node_id].get()[1]
-                if (msg == "hello"):
-                    count = count + 1
-
-        # received N hellos, set state to request (state = 1)
+        # set state to request (state = 1)
         self.state = 1
 
-        # start a thread to handle responding to messages
-        #self.receiveThread.start()
-
         # start doing the state machine stuff
-        self.state_machine()
-
-        # kill receiveThread
-        self.receiveThread.kill()
-
-        if self.receiveThread.is_alive():
-            self.receiveThread.join()
+        while self.alive:
+            self.state_machine()
 
     def state_machine(self):
-        while self.alive:
-            # in the request state
-            if self.state == 1:
-                # multicast request to all nodes in voting set
-                message(self.node_id, self.votingSet, "request", [time.time()]).send()
-                self.numReplies = 0
+        # in the request state
+        if self.state == 1:
+            # multicast request to all nodes in voting set
+            message(self.node_id, self.votingSet, "request", [time.time()]).send()
+            self.numReplies = 0
 
-                # wait for K = len(self.votingSet) replies
-                while (self.numReplies < len(self.votingSet)):
-                    self.receive()
+            # wait for K = len(self.votingSet) replies
+            while (self.numReplies < len(self.votingSet)):
+                self.receive()
+                if self.alive is False:
+                    return
 
-                # got K replies set state to held
-                self.state = 2
 
-            # in the held state
-            elif self.state == 2:
-                print("Critical: {0} {1} {2}".format(time.time(), self.node_id, self.votingSet))
-                # just receive for cs_int seconds (converted earlier from milliseconds)
-                startTime = time.time()
-                while(time.time() - startTime < self.cs_int):
-                    self.receive()
-                # set state to release
-                self.state = 3
+            # got K replies set state to held
+            self.state = 2
 
-            # in the release state
-            elif self.state == 3:
-                # multicast release to all processes in voting set
-                message(self.node_id, self.votingSet, "release").send()
-                # just receive for next_req seconds (converted earlier from milliseconds)
-                startTime = time.time()
-                while(time.time() - startTime < self.next_req):
-                    self.receive()
-                # set state to request again
-                self.state = 1
+        # in the held state
+        elif self.state == 2:
+            print("Critical: {0} {1} {2}".format(time.time(), self.node_id, self.votingSet))
+            # just receive for cs_int seconds (converted earlier from milliseconds)
+            startTime = time.time()
+            while(time.time() - startTime < self.cs_int):
+                self.receive()
+                if self.alive is False:
+                    return
+            # set state to release
+            self.state = 3
+
+        # in the release state
+        elif self.state == 3:
+            # multicast release to all processes in voting set
+            message(self.node_id, self.votingSet, "release").send()
+            # just receive for next_req seconds (converted earlier from milliseconds)
+            startTime = time.time()
+            while(time.time() - startTime < self.next_req):
+                self.receive()
+                if self.alive is False:
+                    return
+            # set state to request again
+            self.state = 1
 
 
 
@@ -165,50 +159,27 @@ class NodeThread(threading.Thread):
 
             elif msg == "reply":
                 self.numReplies = self.numReplies + 1
-                print("{0} numReplies: {1}".format(self.node_id, self.numReplies))
+                #print("{0} numReplies: {1}".format(self.node_id, self.numReplies))
 
             elif msg == "release":
                 if not self.requestQueue.empty():
-                    from_id = self.requestQueue.get()
+                    from_id = self.requestQueue.get()[1]
                     message(self.node_id, from_id, "reply").send()
                     self.voted = True
                 else:
                     self.voted = False
+            elif msg == "kill":
+                self.alive = False
 
-
-    def kill(self):
-        self.alive = False
-
-
-# class receiveThread(threading.Thread):
-#     def __init__(self, node_id, N):
-#         threading.Thread.__init__(self)
-#         self.node_id = node_id
-#         self.N = N
-#         self.alive = True
-
-#     # parse the queue and call respective functions
-#     def run(self):
-#         while self.alive:
-#             if not g_msg[self.node_id].empty():
-#                 msg_tp = g_msg[self.node_id].get()
-
-#                 # get contents of message
-#                 from_id = msg_tp[0]
-#                 msg = msg_tp[1]
-#                 msg_args = msg_tp[2]
-
-#     def kill(self):
-#         self.alive = False
 
 
 if __name__ == '__main__':
     # get command line options for MP3
     parser = OptionParser()
-    parser.add_option("-c", "--csint", dest="cs_int", help="time a process spends in the critical section")
-    parser.add_option("-n", "--nextreq", dest="next_req", help="time a process waits after exiting the critical section before it requests another critical section entrance")
-    parser.add_option("-t", "--totexectime", dest="tot_exec_time", help="total execution time for a thread")
-    parser.add_option("-o", "--option", dest="option", help="Whether to print additional info", default=0)
+    parser.add_option("-c", "--csint", dest="cs_int", help="time a process spends in the critical section in milliseconds")
+    parser.add_option("-n", "--nextreq", dest="next_req", help="time a process waits after exiting the critical section before it requests another critical section entrance in milliseconds")
+    parser.add_option("-t", "--totexectime", dest="tot_exec_time", help="total execution time for a thread in seconds")
+    parser.add_option("-o", "--option", dest="option", help="1 to print additional info else 0", default=0)
 
     (options, args) = parser.parse_args()
     print options
@@ -216,17 +187,15 @@ if __name__ == '__main__':
 
     # spawn N node threads
     for i in range(0, N):
-        n_threads[i] = NodeThread(i, N, int(options.cs_int), int(options.next_req), bool(options.option))
+        n_threads[i] = NodeThread(i, N, int(options.cs_int), int(options.next_req), bool(options.option=='1'))
 
-    # start N threads
-    for thread in n_threads.values():
-        thread.start()
+    # start N threads in random order
+    for i in random.sample(range(0, N), N) :
+        n_threads[i].start()
 
     # wait for tot_exec_time seconds
     time.sleep(int(options.tot_exec_time))
 
     # kill all N threads
-    for thread in n_threads.values():
-        thread.kill()
-        if thread.is_alive():
-            thread.join()
+    message(0, range(0, N), "kill").send()
+
