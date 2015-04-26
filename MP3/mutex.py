@@ -7,9 +7,10 @@ import Queue
 import random
 
 
-# global queues for message passing between threads
+# global queues for message passing between threads and lock to ensure atomic access
 queueLock = threading.Lock()
 g_msg = {}
+
 # global dictionary to store thread handles indexed by node ID
 n_threads = {}
 
@@ -25,7 +26,6 @@ class message():
 
     def send(self):
         # sends a message to a node/s does not wait for a response
-        #print("Send: {0} from {1} to {2}".format(self.msg, self.from_id, self.to_id))
         if type(self.to_id) is list:
             queueLock.acquire()
             for to_id in self.to_id:
@@ -34,16 +34,6 @@ class message():
             queueLock.acquire()
             g_msg[self.to_id].put([self.from_id, self.msg, self.msg_args])
         queueLock.release()
-
-    def send_and_get_response(self):
-        # sends a message to a node and waits for a response
-        g_msg[self.to_id].put([self.from_id, self.msg, self.msg_args])
-
-        response = g_msg[self.from_id].get(block=True)
-        while response[1] != self.ackID:
-            g_msg[self.from_id].put(response)
-            response = g_msg[self.from_id].get(block=True)
-        return response[2]
 
 
 # thread for each node
@@ -76,15 +66,12 @@ class NodeThread(threading.Thread):
             if col == myCol or row == myRow:
                 self.votingSet.append(i)
 
-        #print(self.node_id, self.votingSet)
         # set node as alive
         self.alive = True
 
         # create message queue for this node
         g_msg[node_id] = Queue.Queue()
 
-        # get handle for receive thread
-        #self.receiveThread = receiveThread(self.node_id, self.N)
 
     def run(self):
         # set state to request (state = 1)
@@ -147,30 +134,35 @@ class NodeThread(threading.Thread):
             msg = msg_tp[1]
             msg_args = msg_tp[2]
 
+            # print receive information
             if self.option:
                 print("\nReceive: {0:.6f} {1} {2} {3} {4}".format(time.time(), self.node_id, from_id, msg, msg_args))
 
+            # receive a request
             if msg == "request":
+                # if held or already voted queue request (by timestamp priority)
                 if self.state == 2 or self.voted == True:
                     self.requestQueue.put((msg_args[0], from_id))
+                # else send reply immediately and mark that we've voted
                 else:
                     message(self.node_id, from_id, "reply").send()
                     self.voted = True
-
+            # receive a reply, increment number of replies we've received
             elif msg == "reply":
                 self.numReplies = self.numReplies + 1
-                #print("{0} numReplies: {1}".format(self.node_id, self.numReplies))
-
+            # receive a release
             elif msg == "release":
+                # if we have outstanding requests send reply to head of priority queue
                 if not self.requestQueue.empty():
                     from_id = self.requestQueue.get()[1]
                     message(self.node_id, from_id, "reply").send()
                     self.voted = True
+                # else clear voted boolean
                 else:
                     self.voted = False
+            # receive kill, thread should quit
             elif msg == "kill":
                 self.alive = False
-
 
 
 if __name__ == '__main__':
@@ -182,7 +174,7 @@ if __name__ == '__main__':
     parser.add_option("-o", "--option", dest="option", help="1 to print additional info else 0", default=0)
 
     (options, args) = parser.parse_args()
-    print options
+
     N = 9
 
     # spawn N node threads
