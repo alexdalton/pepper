@@ -27,13 +27,13 @@ class message():
     def send(self):
         # sends a message to a node/s does not wait for a response
         if type(self.to_id) is list:
-            queueLock.acquire()
+            #queueLock.acquire()
             for to_id in self.to_id:
                 g_msg[to_id].put([self.from_id, self.msg, self.msg_args])
         elif type(self.to_id) is int:
-            queueLock.acquire()
+            #queueLock.acquire()
             g_msg[self.to_id].put([self.from_id, self.msg, self.msg_args])
-        queueLock.release()
+        #queueLock.release()
 
 
 # thread for each node
@@ -47,10 +47,13 @@ class NodeThread(threading.Thread):
         self.next_req = float(next_req) / 1000  # convert from ms to s
         self.option = option
         self.N = N
-        self.numReplies = 0
-        self.voted = False
+        self.voted = (0.0, -1)
         self.requestQueue = Queue.PriorityQueue()
         self.threadsFound = 0
+
+        # arrays for keeping track of who sent failed and reply messages
+        self.granted = [0] * self.N
+        self.failed = [0] * self.N
 
         # set state to be init (state = 0)
         self.state = 0
@@ -80,16 +83,18 @@ class NodeThread(threading.Thread):
         # start doing the state machine stuff
         while self.alive:
             self.state_machine()
+        #print("\n{0}\n{1}\n{2}\n{3}".format(self.node_id, self.granted, self.failed, self.voted))
 
     def state_machine(self):
         # in the request state
         if self.state == 1:
             # multicast request to all nodes in voting set
             message(self.node_id, self.votingSet, "request", [time.time()]).send()
-            self.numReplies = 0
+            self.granted = [0] * self.N
+            self.failed = [0] * self.N
 
             # wait for K = len(self.votingSet) replies
-            while (self.numReplies < len(self.votingSet)):
+            while (sum(self.granted) < len(self.votingSet)):
                 self.receive()
                 if self.alive is False:
                     return
@@ -134,35 +139,54 @@ class NodeThread(threading.Thread):
             msg = msg_tp[1]
             msg_args = msg_tp[2]
 
-            # print receive information
-            if self.option:
-                print("\nReceive: {0:.6f} {1} {2} {3} {4}".format(time.time(), self.node_id, from_id, msg, msg_args))
-
             # receive a request
             if msg == "request":
                 # if held or already voted queue request (by timestamp priority)
-                if self.state == 2 or self.voted == True:
+                if self.state == 2 or (self.voted[0] != 0.0 and self.voted[0] < msg_args[0]):
+                    message(self.node_id, from_id, "failed").send()
                     self.requestQueue.put((msg_args[0], from_id))
+                # accidentally replied to lower priority, need to tell to yield
+                elif self.voted[0] > msg_args[0]:
+                    self.requestQueue.put((msg_args[0], from_id))
+                    message(self.node_id, self.voted[1], "inquire").send()
                 # else send reply immediately and mark that we've voted
                 else:
                     message(self.node_id, from_id, "reply").send()
-                    self.voted = True
+                    self.voted = (msg_args[0], from_id)
+            # someone is telling me to yield, unset their reply and respond
+            elif msg == "inquire":
+                if self.state != 2:
+                    self.granted[from_id] = 0
+                    self.failed[from_id] = 1
+                    message(self.node_id, from_id, "yield").send()
+            # they yielded, send reply to top of requestQueue
+            elif msg == "yield":
+                self.requestQueue.put(self.voted)
+                self.voted = self.requestQueue.get()
+                message(self.node_id, self.voted[1], "reply").send()
             # receive a reply, increment number of replies we've received
             elif msg == "reply":
-                self.numReplies = self.numReplies + 1
+                self.granted[from_id] = 1
+            # keep track of who said I failed
+            elif msg == "failed":
+                self.failed[from_id] = 1
             # receive a release
             elif msg == "release":
                 # if we have outstanding requests send reply to head of priority queue
                 if not self.requestQueue.empty():
-                    from_id = self.requestQueue.get()[1]
-                    message(self.node_id, from_id, "reply").send()
-                    self.voted = True
+                    request = self.requestQueue.get()
+                    message(self.node_id, request[1], "reply").send()
+                    self.voted = request
                 # else clear voted boolean
                 else:
-                    self.voted = False
+                    self.voted = (0.0, -1)
             # receive kill, thread should quit
             elif msg == "kill":
                 self.alive = False
+
+            # print receive information
+            if self.option and msg != "kill":
+                print("\nReceive: {0:.6f}, to: {1}, from: {2}, {3}, {4}".format(time.time(), self.node_id, from_id, msg, msg_args))
 
 
 if __name__ == '__main__':
