@@ -2,18 +2,25 @@
 #include "maze.h"
 
 /*
- * findStart -- finds the x and y location of the start of the  maze
- * INPUTS:      maze -- 2D char array that holds the contents of the maze
- *              width -- width of the maze
- *              height -- height of the maze
- *              x -- pointer to where x location should be stored
- *              y -- pointer to where y location should be stored
- * OUTPUTS: x and y will hold the values of the start
+ * findStartEnd -- finds the x and y location of the start and end of the  maze
+ *                 if the end or start does not exist should output (-1, -1) as the location
+ * INPUTS:         maze -- 2D char array that holds the contents of the maze
+ *                 width -- width of the maze
+ *                 height -- height of the maze
+ *                 xStart -- pointer to where x start location should be stored
+ *                 yStart -- pointer to where y start location should be stored
+ *                 xEnd -- pointer to where x end location should be stored
+ *                 yEnd -- pointer to where y end location should be stored
+ * OUTPUTS: xStart, yStart, xEnd, and yEnd set to corresponding locations
  * RETURN: none
  * SIDE EFFECTS: none
  */ 
-void findStart(char ** maze, int width, int height, int * x, int * y)
+void findStartEnd(char ** maze, int width, int height, int * xStart, int * yStart, int * xEnd, int * yEnd)
 {
+    *xStart = -1;
+    *yStart = -1;
+    *xEnd = -1;
+    *yEnd = -1;
 }
 
 /*
@@ -30,17 +37,19 @@ void printMaze(char ** maze, int width, int height)
 }
 
 /*
- * solveMazeDFS -- recursively solves the maze using depth first search
- * INPUTS:         maze -- 2D char array that holds the contents of the maze
- *                 width -- the width of the maze
- *                 height -- the height of the maze
- *                 xPos -- the current x position within the maze
- *                 yPos -- the current y position within the maze
- * OUTPUTS:        updates maze with the solution path ('.') and visited nodes ('~')
- * RETURNS:        0 if the maze is unsolvable, 1 if it is solved
- * SIDE EFFECTS:   none
+ * solveMazeManhattanDFS -- recursively solves the maze using depth first search and a manhattan distance heuristic
+ * INPUTS:                  maze -- 2D char array that holds the contents of the maze
+ *                          width -- the width of the maze
+ *                          height -- the height of the maze
+ *                          xPos -- the current x position within the maze
+ *                          yPos -- the current y position within the maze
+ *                          xEnd -- the x position of the end of the maze
+ *                          yEnd -- the y position of the end of the maze
+ * OUTPUTS:                 updates maze with the solution path ('.') and visited nodes ('~')
+ * RETURNS:                 0 if the maze is unsolvable, 1 if it is solved
+ * SIDE EFFECTS:            none
  */ 
-int solveMazeDFS(char ** maze, int width, int height, int xPos, int yPos)
+int solveMazeManhattanDFS(char ** maze, int width, int height, int xPos, int yPos, int xEnd, int yEnd)
 {
     return 0;
 }
@@ -118,4 +127,3 @@ int dequeue(int * queue, int * head, int * tail, int maxSize)
     *head = *head + 1;
     return queue[*head % maxSize];
 }
-

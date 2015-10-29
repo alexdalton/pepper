@@ -20,7 +20,7 @@ int main(int argc, char **argv)
         printf("Could not open file: %s\n", argv[1]);
         return -1;
     }
-    // get BFS/DFS from command line argument
+    // get ManhattanDFS/BFS from command line argument
     int mode = atoi(argv[2]);
     // read height and width from file
     fscanf(in, "%d", &width);
@@ -52,9 +52,9 @@ int main(int argc, char **argv)
     }
     fclose(in);
  
-    int yStart, xStart;
+    int yStart, xStart, yEnd, xEnd;
     // get the start of the maze
-    findStart(maze, width, height, &xStart, &yStart);
+    findStartEnd(maze, width, height, &xStart, &yStart, &xEnd, &yEnd);
     if (xStart == -1 || yStart == -1)
     {
         printf("Could not find start of maze\n");
@@ -63,10 +63,10 @@ int main(int argc, char **argv)
     }
     printf("Start of maze at (%d, %d)\n", xStart, yStart);
 
-    // solve the maze using DFS or BFS depending on what mode is
+    // solve the maze using ManhattanDFS or BFS depending on what mode is
     int solved;
     if (mode == 0)
-        solved = solveMazeDFS(maze, width, height, xStart, yStart);
+        solved = solveMazeManhattanDFS(maze, width, height, xStart, yStart, xEnd, yEnd);
     else
         solved = solveMazeBFS(maze, width, height, xStart, yStart);
 

@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <math.h>
 #include "maze.h"
 
 /*
@@ -35,7 +34,7 @@ void findStartEnd(char ** maze, int width, int height, int * xStart, int * yStar
             if (maze[y][x] == END)
             {
                 *xEnd = x;
-                *xStart = y;
+                *yEnd = y;
             }
         }
     }
@@ -63,8 +62,17 @@ void printMaze(char ** maze, int width, int height)
     }
 }
 
+int manhattan(int x1, int y1, int x2, int y2)
+{
+    int xDist = x1 - x2;
+    int yDist = y1 - y2;
+    if (xDist < 0) xDist *= -1;
+    if (yDist < 0) yDist *= -1;
+    return xDist + yDist;
+}
+
 /*
- * solveMazeBestFirst -- recursively solves the maze using best first search and manhattan distance heuristic
+ * solveMazeManhattanDFS -- recursively solves the maze using depth first search and a manhattan distance heuristic
  * INPUTS:               maze -- 2D char array that holds the contents of the maze
  *                       width -- the width of the maze
  *                       height -- the height of the maze
@@ -76,7 +84,7 @@ void printMaze(char ** maze, int width, int height)
  * RETURNS:              0 if the maze is unsolvable, 1 if it is solved
  * SIDE EFFECTS:         none
  */ 
-int solveMazeDFS(char ** maze, int width, int height, int xPos, int yPos, int xEnd, int yEnd)
+int solveMazeManhattanDFS(char ** maze, int width, int height, int xPos, int yPos, int xEnd, int yEnd)
 {
     if (xPos < 0 || xPos >= width || yPos < 0 || yPos >= height)
         return 0;
@@ -91,26 +99,54 @@ int solveMazeDFS(char ** maze, int width, int height, int xPos, int yPos, int xE
  
     maze[yPos][xPos] = PATH;
 
-    int xPositions[4] = { xPos - 1, xPos + 1, xPos, xPos };
-    int yPositions[4] = { yPos, yPos, yPos - 1, yPos + 1 };
-    int distances[4] = { manhattan(xPos - 1, yPos, xEnd, yEnd), 
-                         manhattan(xPos + 1, yPos, xEnd, yEnd),
-                         manhattan(xPos, yPos - 1, xEnd, yEnd),
-                         manhattan(xPos, yPos + 1, xEnd, yEnd) };
+    int leftDist = manhattan(xPos - 1, yPos, xEnd, yEnd);
+    int rightDist = manhattan(xPos + 1, yPos, xEnd, yEnd);
+    int upDist = manhattan(xPos, yPos - 1, xEnd, yEnd);
+    int downDist = manhattan(xPos, yPos + 1, xEnd, yEnd);
 
     int i;
     for(i = 0; i < 4; i++) 
     {
-    }
-
-    if (solveMazeDFS(maze, width, height, xPos + 1, yPos) ||
-        solveMazeDFS(maze, width, height, xPos - 1, yPos) ||
-        solveMazeDFS(maze, width, height, xPos, yPos + 1) ||
-        solveMazeDFS(maze, width, height, xPos, yPos - 1))
-    {
-        if (start)
-            maze[yPos][xPos] = START;
-        return 1;
+        if (leftDist <= rightDist && leftDist <= upDist && leftDist <= downDist) 
+        {
+            if (solveMazeManhattanDFS(maze, width, height, xPos - 1, yPos, xEnd, yEnd))
+            {
+                if (start)
+                    maze[yPos][xPos] = START;
+                return 1;    
+            }
+            leftDist = 1000000;
+        }
+        if (downDist <= upDist && downDist <= leftDist && downDist <= rightDist)
+        {
+            if (solveMazeManhattanDFS(maze, width, height, xPos, yPos + 1, xEnd, yEnd))
+            {
+                if (start)
+                    maze[yPos][xPos] = START;
+                return 1;    
+            }
+            downDist = 1000000;
+        }
+        if (rightDist <= leftDist && rightDist <= upDist && rightDist <= downDist)
+        {            
+            if (solveMazeManhattanDFS(maze, width, height, xPos + 1, yPos, xEnd, yEnd))
+            {
+                if (start)
+                    maze[yPos][xPos] = START;
+                return 1;    
+            }
+            rightDist = 1000000;
+        }
+        if (upDist <= leftDist && upDist <= rightDist && upDist <= downDist)
+        {
+            if (solveMazeManhattanDFS(maze, width, height, xPos, yPos - 1, xEnd, yEnd))
+            {
+                if (start)
+                    maze[yPos][xPos] = START;
+                return 1;    
+            }
+            upDist = 1000000;
+        }
     }
  
     if (start)
@@ -121,9 +157,26 @@ int solveMazeDFS(char ** maze, int width, int height, int xPos, int yPos, int xE
     return 0;
 }
 
-int manhattan(int x1, int y1, int x2, int y2)
+int countSurroundingPath(char ** maze, int width, int height, int x, int y)
 {
-    return abs(x1 - x2) + abs(y1 - y2);
+    int left = 0, right = 0, down = 0, up = 0;
+    if ((x - 1) >= 0)
+    {
+        left = (maze[y][x - 1] == PATH) || (maze[y][x - 1] == START) || (maze[y][x - 1] == END);
+    }
+    if ((x + 1) < width)
+    {
+        right = (maze[y][x + 1] == PATH) || (maze[y][x + 1] == START) || (maze[y][x + 1] == END);
+    }
+    if ((y - 1) >= 0)
+    {
+        down = (maze[y - 1][x] == PATH) || (maze[y - 1][x] == START) || (maze[y - 1][x] == END);
+    }
+    if ((y + 1) < height)
+    {
+        up = (maze[y + 1][x] == PATH) || (maze[y + 1][x] == START) || (maze[y + 1][x] == END);
+    }
+    return left + right + down + up;
 }
 
 /*
@@ -139,52 +192,20 @@ int manhattan(int x1, int y1, int x2, int y2)
  */ 
 int checkMaze(char ** maze, int width, int height, int x, int y)
 {
-    int prevX = x, prevY = y;
-    // go from start to end following the path
-    while(maze[y][x] != END)
+    int i, j;
+    for (i = 0; i < height; i++)
     {
-        if (y + 1 < height && (maze[y + 1][x] == PATH || maze[y + 1][x] == END) && y + 1 != prevY)
+        for (j = 0; j < width; j++)
         {
-            if ((y - 1 >= 0 && maze[y - 1][x] == PATH && y - 1 != prevY) ||
-               (x + 1 < width && maze[y][x + 1] == PATH && x + 1 != prevX) ||
-               (x - 1 >= 0 && maze[y][x - 1] == PATH && x - 1 != prevX))
-                return 0;
-            prevY = y;
-            prevX = x;
-            y++;
+            if (maze[y][x] == START || maze[y][x] == END) {
+                if (countSurroundingPath(maze, width, height, x, y) != 1)
+                    return 0;
+            }
+            if (maze[y][x] == PATH) {
+                if (countSurroundingPath(maze, width, height, x , y) != 2)
+                    return 0;
+            }
         }
-        else if (y - 1 >= 0 && (maze[y - 1][x] == PATH || maze[y - 1][x] == END) && y - 1 != prevY)
-        {
-            if ((y + 1 < height && maze[y + 1][x] == PATH && y + 1 != prevY) ||
-               (x + 1 < width && maze[y][x + 1] == PATH && x + 1 != prevX) ||
-               (x - 1 >= 0 && maze[y][x - 1] == PATH && x - 1 != prevX))
-                return 0;
-            prevY = y;
-            prevX = x;
-            y--;
-        }
-        else if (x + 1 < width && (maze[y][x + 1] == PATH || maze[y][x + 1] == END) && x + 1 != prevX)
-        {
-            if ((y + 1 < height && maze[y + 1][x] == PATH && y + 1 != prevY) ||
-               (y - 1 >= 0 && maze[y - 1][x] == PATH && y - 1 != prevY) ||
-               (x - 1 >= 0 && maze[y][x - 1] == PATH && x - 1 != prevX))
-                return 0;
-            prevX = x;
-            prevY = y;
-            x++;
-        }
-        else if (x - 1 >= 0 && (maze[y][x - 1] == PATH || maze[y][x - 1] == END) && x - 1 != prevX)
-        {
-            if ((y + 1 < height && maze[y + 1][x] == PATH && y + 1 != prevY) ||
-               (y - 1 >= 0 && maze[y - 1][x] == PATH && y - 1 != prevY) ||
-               (x + 1 < width && maze[y][x + 1] == PATH && x + 1 != prevX))
-                return 0;
-            prevX = x;
-            prevY = y;
-            x--;
-        }
-        else
-            return 0;
     }
     return 1;
 }
